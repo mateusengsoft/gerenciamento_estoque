@@ -3,7 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
-
+import { buildDatabaseOptions } from './database/database.config.js';
 
 @Module({
   imports: [
@@ -13,19 +13,12 @@ import { AppService } from './app.service.js';
 
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        host: configService.getOrThrow<string>('DB_HOST'),
-        port: Number(configService.getOrThrow<string>('DB_PORT')),
-        username: configService.getOrThrow<string>('DB_USERNAME'),
-        password: configService.getOrThrow<string>('DB_PASSWORD'),
-        database: configService.getOrThrow<string>('DB_DATABASE'),
-        autoLoadEntities: true,
-        synchronize: false,
-      }),
+      useFactory: (configService: ConfigService) => {
+        const lerVariavel = (name: string) => configService.getOrThrow<string>(name);
+        const opcoes = buildDatabaseOptions(lerVariavel);
+        return { ...opcoes, autoLoadEntities: true };
+      },
     }),
-
-   
   ],
   controllers: [AppController],
   providers: [AppService],
