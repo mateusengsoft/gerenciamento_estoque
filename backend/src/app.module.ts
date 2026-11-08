@@ -14,7 +14,8 @@ import { buildDatabaseOptions } from './database/database.config.js';
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
-        const lerVariavel = (name: string) => configService.getOrThrow<string>(name);
+        const lerVariavel = (name: string) =>
+          configService.getOrThrow<string>(name);
         const opcoes = buildDatabaseOptions(lerVariavel);
         return { ...opcoes, autoLoadEntities: true };
       },
