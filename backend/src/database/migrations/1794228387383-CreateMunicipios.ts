@@ -1,9 +1,8 @@
-import { MigrationInterface, QueryRunner } from "typeorm";
+import { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class CreateMunicipios1794228387383 implements MigrationInterface {
-
-    public async up(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query( `create table municipios (
+  public async up(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(`create table municipios (
             id serial primary key,
             codigo integer not null,
             nome varchar(255) not null,
@@ -19,14 +18,12 @@ export class CreateMunicipios1794228387383 implements MigrationInterface {
                 constraint fk_municipios_usuario_id foreign key (usuario_id) references usuarios(id) on delete restrict
             )`);
 
-        await queryRunner.query(`
+    await queryRunner.query(`
             create index idx_municipios_estado_id on municipios (estado_id)
             `);
-        }
+  }
 
-    public async down(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query(`drop table municipios`);
-    }
-
+  public async down(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(`drop table municipios`);
+  }
 }
- 
