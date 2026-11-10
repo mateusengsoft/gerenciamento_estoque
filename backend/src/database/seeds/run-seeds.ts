@@ -18,6 +18,31 @@ interface BairroIbge {
   Nome: string;
 }
 
+const UNIDADES_MEDIDA = [
+  { nome: 'Unidade', sigla: 'un' },
+  { nome: 'Quilograma', sigla: 'kg' },
+  { nome: 'Grama', sigla: 'g' },
+  { nome: 'Litro', sigla: 'L' },
+  { nome: 'Mililitro', sigla: 'mL' },
+  { nome: 'Caixa', sigla: 'cx' },
+  { nome: 'Pacote', sigla: 'pct' },
+];
+
+const CATEGORIAS = [
+  'Laticínios',
+  'Carnes',
+  'Grãos e Cereais',
+  'Bebidas',
+  'Hortifrúti',
+  'Padaria',
+  'Congelados',
+  'Mercearia',
+];
+
+const CORREDORES = ['A', 'B'];
+const PRATELEIRAS = ['1', '2'];
+const SECOES = ['1', '2'];
+
 function lerJson<T>(arquivo: string): T[] {
   const conteudo = readFileSync(`src/database/seeds/data/${arquivo}`, 'utf-8');
   return JSON.parse(conteudo).data;
@@ -123,6 +148,57 @@ async function seedBairros(
   console.log(`Bairros: ${bairros.length}`);
 }
 
+async function seedUnidadesMedida(
+  manager: EntityManager,
+  sistemaId: number,
+): Promise<void> {
+  for (const unidade of UNIDADES_MEDIDA) {
+    await manager.query(
+      `insert into unidades_medida (nome, sigla, usuario_id)
+       values ($1, $2, $3)
+       on conflict do nothing`,
+      [unidade.nome, unidade.sigla, sistemaId],
+    );
+  }
+  console.log(`Unidades de medida: ${UNIDADES_MEDIDA.length}`);
+}
+
+async function seedCategorias(
+  manager: EntityManager,
+  sistemaId: number,
+): Promise<void> {
+  for (const categoria of CATEGORIAS) {
+    await manager.query(
+      `insert into categorias (nome, usuario_id)
+       values ($1, $2)
+       on conflict do nothing`,
+      [categoria, sistemaId],
+    );
+  }
+  console.log(`Categorias: ${CATEGORIAS.length}`);
+}
+
+async function seedLocais(
+  manager: EntityManager,
+  sistemaId: number,
+): Promise<void> {
+  let contador = 0;
+  for (const corredor of CORREDORES) {
+    for (const prateleira of PRATELEIRAS) {
+      for (const secao of SECOES) {
+        await manager.query(
+          `
+                    insert into locais(corredor,prateleira,secao,usuario_id)
+                    values($1,$2,$3,$4)
+                    on conflict do nothing`,
+          [corredor, prateleira, secao, sistemaId],
+        );
+        contador++;
+      }
+    }
+  }
+  console.log(`Locais: ${contador}`);
+}
 async function main() {
   await dataSource.initialize();
   try {
@@ -132,6 +208,9 @@ async function main() {
       await seedEstados(manager, sistemaId);
       await seedMunicipios(manager, sistemaId);
       await seedBairros(manager, sistemaId);
+      await seedUnidadesMedida(manager, sistemaId);
+      await seedCategorias(manager, sistemaId);
+      await seedLocais(manager, sistemaId);
     });
   } finally {
     await dataSource.destroy();
