@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
 import { buildDatabaseOptions } from './database/database.config.js';
+import { CategoriasModule } from './categorias/categorias.module.js';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { buildDatabaseOptions } from './database/database.config.js';
         return { ...opcoes, autoLoadEntities: true };
       },
     }),
+    CategoriasModule,
   ],
   controllers: [AppController],
   providers: [AppService],
