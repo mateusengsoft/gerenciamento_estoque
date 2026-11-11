@@ -1,6 +1,8 @@
-import dataSource from '../data-source.js';
+import dataSource, { lerVariavel } from '../data-source.js';
 import type { EntityManager } from 'typeorm';
 import { readFileSync } from 'node:fs';
+import bcrypt from 'bcrypt';
+import { TipoUsuario } from '../../usuarios/tipo-usuario.enum.js';
 
 interface EstadoIbge {
   CodigoUf: number;
@@ -60,6 +62,27 @@ async function seedSistema(manager: EntityManager): Promise<number> {
   );
   return sistema.id;
 }
+
+async function seedAdmin(manager: EntityManager): Promise<void> {
+  const senha = lerVariavel('ADMIN_SENHA');
+  const senhaHash = await bcrypt.hash(senha, 10);
+  await manager.query(
+    `
+    insert into usuarios (login, senha_hash, nome, email, tipo, cpf, ativo)
+    values ($1,$2,$3,$4,$5,$6,$7)
+    on conflict do nothing`,
+    [
+      lerVariavel('ADMIN_LOGIN'),
+      senhaHash,
+      lerVariavel('ADMIN_NOME'),
+      lerVariavel('ADMIN_EMAIL'),
+      TipoUsuario.ADMINISTRADOR,
+      lerVariavel('ADMIN_CPF'),
+      true,
+    ],
+  );
+}
+
 async function seedEstados(
   manager: EntityManager,
   sistemaId: number,
@@ -211,6 +234,7 @@ async function main() {
       await seedUnidadesMedida(manager, sistemaId);
       await seedCategorias(manager, sistemaId);
       await seedLocais(manager, sistemaId);
+      await seedAdmin(manager);
     });
   } finally {
     await dataSource.destroy();

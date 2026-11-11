@@ -3,7 +3,7 @@ import { buildDatabaseOptions } from './database.config.js';
 
 process.loadEnvFile();
 
-const lerVariavel = (name: string): string => {
+export const lerVariavel = (name: string): string => {
   const valor = process.env[name];
   if (!valor) {
     throw new Error(`Variável de ambiente ${name} não definida`);
