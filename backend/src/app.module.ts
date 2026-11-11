@@ -5,6 +5,7 @@ import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
 import { buildDatabaseOptions } from './database/database.config.js';
 import { CategoriasModule } from './categorias/categorias.module.js';
+import { AuthModule } from './auth/auth.module.js';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { CategoriasModule } from './categorias/categorias.module.js';
       },
     }),
     CategoriasModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
