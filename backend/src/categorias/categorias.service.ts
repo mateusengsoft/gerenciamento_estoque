@@ -2,6 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Categoria } from './categoria.entity.js';
 import { Repository } from 'typeorm';
+import { PaginacaoDto } from '../common/dto/paginacao.dto.js';
+import type { Paginado } from '../common/interface/paginado.interface.js';
 
 @Injectable()
 export class CategoriasService {
@@ -10,11 +12,19 @@ export class CategoriasService {
     private readonly categoriasRepository: Repository<Categoria>,
   ) {}
 
-  async listar(): Promise<Categoria[]> {
-    const categorias = await this.categoriasRepository.find({
+  async listar(paginacao: PaginacaoDto): Promise<Paginado<Categoria>> {
+    const { pagina, limite } = paginacao;
+    const [categorias, total] = await this.categoriasRepository.findAndCount({
+      skip: (pagina - 1) * limite,
+      take: limite,
       order: { nome: 'ASC' },
     });
-    return categorias;
+    return {
+      dados: categorias,
+      total,
+      pagina,
+      limite,
+    };
   }
 
   async buscarPorId(id: number): Promise<Categoria> {

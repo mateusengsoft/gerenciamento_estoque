@@ -1,17 +1,18 @@
-import { Controller, Get, Param, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Param, ParseIntPipe, Query } from '@nestjs/common';
 import { CategoriasService } from './categorias.service.js';
+import { PaginacaoDto } from '../common/dto/paginacao.dto.js';
 
 @Controller('categorias')
 export class CategoriasController {
-  constructor(private readonly categoriasService: CategoriasService) {}
+  constructor(private readonly categoriaService: CategoriasService) {}
 
   @Get()
-  listar() {
-    return this.categoriasService.listar();
+  listar(@Query() paginacao: PaginacaoDto) {
+    return this.categoriaService.listar(paginacao);
   }
 
   @Get(':id')
   buscarPorId(@Param('id', ParseIntPipe) id: number) {
-    return this.categoriasService.buscarPorId(id);
+    return this.categoriaService.buscarPorId(id);
   }
 }
