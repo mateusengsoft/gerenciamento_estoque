@@ -101,9 +101,13 @@ export class UsuariosService {
         (erro.driverError as { code?: string }).code === '23505'
       ) {
         throw new ConflictException('Login, e-mail ou CPF já cadastrado.');
-      } 
-      if (erro instanceof QueryFailedError && (erro.driverError as {code?: string}).code ==='23503'
-    ){ throw new BadRequestException('Município informado não existe.')}
+      }
+      if (
+        erro instanceof QueryFailedError &&
+        (erro.driverError as { code?: string }).code === '23503'
+      ) {
+        throw new BadRequestException('Município informado não existe.');
+      }
 
       throw erro;
     }
