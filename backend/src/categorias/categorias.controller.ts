@@ -9,8 +9,9 @@ import {
 import { CategoriasService } from './categorias.service.js';
 import { PaginacaoDto } from '../common/dto/paginacao.dto.js';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
+import { PerfisGuard } from '../auth/perfis.guard.js';
 
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, PerfisGuard)
 @Controller('categorias')
 export class CategoriasController {
   constructor(private readonly categoriasService: CategoriasService) {}
