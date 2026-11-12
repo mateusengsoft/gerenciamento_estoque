@@ -19,4 +19,13 @@ export class UsuariosService {
 
     return usuario;
   }
+
+  async buscarPorId(id: number): Promise<Usuario | null> {
+    const usuario = await this.usuariosRepository.findOne({
+      where: { id },
+      select: { id: true, tipo: true, ativo: true },
+    });
+
+    return usuario;
+  }
 }
