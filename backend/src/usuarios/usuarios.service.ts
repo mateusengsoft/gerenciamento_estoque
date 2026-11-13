@@ -2,10 +2,11 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
+  UseGuards,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Usuario } from './usuario.entity.js';
-import { DataSource, QueryFailedError, Repository } from 'typeorm';
+import { DataSource, Not, QueryFailedError, Repository } from 'typeorm';
 import { CriarUsuarioDto } from './dto/criar-usuario.dto.js';
 import { cpfValido } from '../common/validators/cpf.js';
 import bcrypt from 'bcrypt';
@@ -15,6 +16,8 @@ import { Contato } from '../contatos/contato.entity.js';
 import { UsuarioContato } from './usuario-contato.entity.js';
 import { UsuarioEndereco } from './usuario-endereco.entity.js';
 import type { UsuarioPublico } from './usuario-publico.interface.js';
+import { PaginacaoDto } from '../common/dto/paginacao.dto.js';
+import type { Paginado } from '../common/interface/paginado.interface.js';
 
 @Injectable()
 export class UsuariosService {
@@ -130,5 +133,29 @@ export class UsuariosService {
     });
 
     return usuario;
+  }
+
+  async listar(paginacao: PaginacaoDto): Promise<Paginado<UsuarioPublico>> {
+    const { pagina, limite } = paginacao;
+    const [usuarios, total] = await this.usuariosRepository.findAndCount({
+      where: { login: Not('sistema') },
+      skip: (pagina - 1) * limite,
+      take: limite,
+      order: { nome: 'ASC' },
+      select: {
+        id: true,
+        nome: true,
+        login: true,
+        email: true,
+        tipo: true,
+        ativo: true,
+      },
+    });
+    return {
+      dados: usuarios,
+      total,
+      pagina,
+      limite,
+    };
   }
 }

@@ -9,6 +9,7 @@ import { AuthController } from './auth.controller.js';
   imports: [
     UsuariosModule,
     JwtModule.registerAsync({
+      global: true,
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
         const lerVariavel = (name: string) =>
