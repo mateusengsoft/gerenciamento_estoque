@@ -2,11 +2,11 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
-  UseGuards,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Usuario } from './usuario.entity.js';
-import { DataSource, Not, QueryFailedError, Repository } from 'typeorm';
+import { DataSource, In, Not, QueryFailedError, Repository } from 'typeorm';
 import { CriarUsuarioDto } from './dto/criar-usuario.dto.js';
 import { cpfValido } from '../common/validators/cpf.js';
 import bcrypt from 'bcrypt';
@@ -25,6 +25,18 @@ export class UsuariosService {
     @InjectRepository(Usuario)
     private readonly usuariosRepository: Repository<Usuario>,
     private readonly dataSource: DataSource,
+
+    @InjectRepository(Contato)
+    private readonly contatosRepository: Repository<Contato>,
+
+    @InjectRepository(UsuarioContato)
+    private readonly usuariosContatosRepository: Repository<UsuarioContato>,
+
+    @InjectRepository(Endereco)
+    private readonly enderecosRepository: Repository<Endereco>,
+
+    @InjectRepository(UsuarioEndereco)
+    private readonly usuariosEnderecosRepository: Repository<UsuarioEndereco>,
   ) {}
 
   async autoCadastrar(dto: CriarUsuarioDto): Promise<UsuarioPublico> {
@@ -157,5 +169,62 @@ export class UsuariosService {
       pagina,
       limite,
     };
+  }
+
+  async detalhar(id: number) {
+    const usuario = await this.usuariosRepository.findOne({
+      where: { id },
+      select: {
+        id: true,
+        nome: true,
+        login: true,
+        email: true,
+        tipo: true,
+        ativo: true,
+        cpf: true,
+      },
+    });
+    if (!usuario || usuario.login === 'sistema') {
+      throw new NotFoundException('Usuário não encontrado.');
+    }
+
+    const associacoesEnderecos = await this.usuariosEnderecosRepository.find({
+      where: { usuarioId: id },
+      select: { usuarioId: true, enderecoId: true },
+    });
+
+    const idsEnderecos = associacoesEnderecos.map((a) => a.enderecoId);
+    const enderecos =
+      idsEnderecos.length > 0
+        ? await this.enderecosRepository.find({
+            where: { id: In(idsEnderecos) },
+            select: {
+              id: true,
+              logradouro: true,
+              numero: true,
+              complemento: true,
+              cep: true,
+              municipioId: true,
+              bairroId: true,
+              bairroNome: true,
+            },
+          })
+        : [];
+
+    const associacoesContatos = await this.usuariosContatosRepository.find({
+      where: { usuarioId: id },
+      select: { usuarioId: true, contatoId: true },
+    });
+
+    const idsContatos = associacoesContatos.map((a) => a.contatoId);
+    const contatos =
+      idsContatos.length > 0
+        ? await this.contatosRepository.find({
+            where: { id: In(idsContatos) },
+            select: { id: true, codigoPais: true, ddd: true, numero: true },
+          })
+        : [];
+
+    return { ...usuario, enderecos, contatos };
   }
 }

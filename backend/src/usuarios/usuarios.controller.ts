@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { CriarUsuarioDto } from './dto/criar-usuario.dto.js';
 import { UsuariosService } from './usuarios.service.js';
 import { PaginacaoDto } from '../common/dto/paginacao.dto.js';
@@ -21,5 +30,12 @@ export class UsuariosController {
   @Perfis(TipoUsuario.ADMINISTRADOR)
   listar(@Query() paginacao: PaginacaoDto) {
     return this.usuariosService.listar(paginacao);
+  }
+
+  @Get(':id')
+  @UseGuards(JwtAuthGuard, PerfisGuard)
+  @Perfis(TipoUsuario.ADMINISTRADOR)
+  detalhar(@Param('id', ParseIntPipe) id: number) {
+    return this.usuariosService.detalhar(id);
   }
 }
