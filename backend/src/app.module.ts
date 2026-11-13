@@ -10,6 +10,7 @@ import { UsuariosModule } from './usuarios/usuarios.module.js';
 import { GeografiaModule } from './geografia/geografia.module.js';
 import { UnidadesMedidaModule } from './unidades-medida/unidades-medida.module.js';
 import { LocaisModule } from './locais/locais.module.js';
+import { FornecedoresModule } from './fornecedores/fornecedores.module.js';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { LocaisModule } from './locais/locais.module.js';
     GeografiaModule,
     UnidadesMedidaModule,
     LocaisModule,
+    FornecedoresModule
   ],
   controllers: [AppController],
   providers: [AppService],
