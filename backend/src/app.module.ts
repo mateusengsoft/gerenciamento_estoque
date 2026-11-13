@@ -8,6 +8,8 @@ import { CategoriasModule } from './categorias/categorias.module.js';
 import { AuthModule } from './auth/auth.module.js';
 import { UsuariosModule } from './usuarios/usuarios.module.js';
 import { GeografiaModule } from './geografia/geografia.module.js';
+import { UnidadesMedidaModule } from './unidades-medida/unidades-medida.module.js';
+import { LocaisModule } from './locais/locais.module.js';
 
 @Module({
   imports: [
@@ -28,6 +30,8 @@ import { GeografiaModule } from './geografia/geografia.module.js';
     AuthModule,
     UsuariosModule,
     GeografiaModule,
+    UnidadesMedidaModule,
+    LocaisModule,
   ],
   controllers: [AppController],
   providers: [AppService],
