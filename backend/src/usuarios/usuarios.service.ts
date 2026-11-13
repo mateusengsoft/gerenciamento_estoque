@@ -18,6 +18,7 @@ import { UsuarioEndereco } from './usuario-endereco.entity.js';
 import type { UsuarioPublico } from './usuario-publico.interface.js';
 import { PaginacaoDto } from '../common/dto/paginacao.dto.js';
 import type { Paginado } from '../common/interface/paginado.interface.js';
+import { AtualizarAtivacaoDto } from './dto/atualizar-ativacao.dto.js';
 
 @Injectable()
 export class UsuariosService {
@@ -226,5 +227,38 @@ export class UsuariosService {
         : [];
 
     return { ...usuario, enderecos, contatos };
+  }
+
+  async atualizarAtivacao(
+    id: number,
+    dto: AtualizarAtivacaoDto,
+  ): Promise<UsuarioPublico> {
+    const existente = await this.usuariosRepository.findOne({
+      where: { id },
+      select: { id: true, login: true },
+    });
+
+    if (!existente || existente.login === 'sistema') {
+      throw new NotFoundException('Usuário não encontrado.');
+    }
+
+    await this.usuariosRepository.update(id, {
+      ativo: dto.ativo,
+      tipo: dto.tipo,
+    });
+
+    const atualizado = await this.usuariosRepository.findOneOrFail({
+      where: { id },
+      select: {
+        id: true,
+        login: true,
+        nome: true,
+        email: true,
+        tipo: true,
+        ativo: true,
+      },
+    });
+
+    return atualizado;
   }
 }
