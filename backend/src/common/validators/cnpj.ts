@@ -3,7 +3,6 @@ export function cnpjValido(cnpj: string): boolean {
     return false;
   }
 
-
   if (/^(\d)\1{13}$/.test(cnpj)) {
     return false;
   }
