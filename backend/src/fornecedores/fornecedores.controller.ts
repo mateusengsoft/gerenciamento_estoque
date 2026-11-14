@@ -1,7 +1,9 @@
 import {
   Body,
   Controller,
+  Get,
   Post,
+  Query,
   Req,
   UnauthorizedException,
   UseGuards,
@@ -13,6 +15,7 @@ import { Perfis } from '../auth/perfis.decorator.js';
 import { CriarFornecedorDto } from './dto/criar-fornecedor.dto.js';
 import type { RequestComUsuario } from '../auth/payload-jwt.interface.js';
 import { FornecedoresService } from './fornecedores.service.js';
+import { PaginacaoDto } from '../common/dto/paginacao.dto.js';
 
 @Controller('fornecedores')
 export class FornecedoresController {
@@ -30,5 +33,11 @@ export class FornecedoresController {
     }
 
     return this.fornecedoresService.cadastrar(dto, request.usuario.sub);
+  }
+
+  @UseGuards(JwtAuthGuard, PerfisGuard)
+  @Get()
+  listar(@Query() paginacao: PaginacaoDto) {
+    return this.fornecedoresService.listar(paginacao);
   }
 }
