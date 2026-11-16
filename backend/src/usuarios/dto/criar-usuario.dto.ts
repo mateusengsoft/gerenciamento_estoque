@@ -16,6 +16,10 @@ export class CriarUsuarioDto {
   @IsString()
   @IsNotEmpty()
   @MaxLength(20)
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
+  @Matches(/^[a-zA-Z0-9._-]+$/, {
+    message: 'O login só pode ter letras, números, ponto, hífen e sublinhado.',
+  })
   login: string;
 
   @IsString()
