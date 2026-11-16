@@ -12,6 +12,7 @@ import { UnidadesMedidaModule } from './unidades-medida/unidades-medida.module.j
 import { LocaisModule } from './locais/locais.module.js';
 import { FornecedoresModule } from './fornecedores/fornecedores.module.js';
 import { ProdutosModule } from './produtos/produtos.module.js';
+import { MovimentacoesModule } from './movimentacoes/movimentacoes.module.js';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { ProdutosModule } from './produtos/produtos.module.js';
     LocaisModule,
     FornecedoresModule,
     ProdutosModule,
+    MovimentacoesModule,  
   ],
   controllers: [AppController],
   providers: [AppService],
