@@ -49,8 +49,8 @@ export class MovimentacoesController {
   }
 
   @Get()
-@UseGuards(JwtAuthGuard, PerfisGuard)
-listarHistorico(@Query() filtros: FiltrarMovimentacoesDto) {
-  return this.movimentacoesService.listarHistorico(filtros);
-}
+  @UseGuards(JwtAuthGuard, PerfisGuard)
+  listarHistorico(@Query() filtros: FiltrarMovimentacoesDto) {
+    return this.movimentacoesService.listarHistorico(filtros);
+  }
 }

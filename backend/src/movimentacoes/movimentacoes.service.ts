@@ -305,81 +305,99 @@ export class MovimentacoesService {
       return { movimentacaoId: movimentacao.id };
     });
   }
-  async listarHistorico(filtros: FiltrarMovimentacoesDto): Promise<Paginado<MovimentacaoHistorico>> {
-  const {
-    pagina, limite, produtoId, tipo, motivo, usuarioId,
-    quantidadeMinima, quantidadeMaxima, dataInicio, dataFim,
-  } = filtros;
+  async listarHistorico(
+    filtros: FiltrarMovimentacoesDto,
+  ): Promise<Paginado<MovimentacaoHistorico>> {
+    const {
+      pagina,
+      limite,
+      produtoId,
+      tipo,
+      motivo,
+      usuarioId,
+      quantidadeMinima,
+      quantidadeMaxima,
+      dataInicio,
+      dataFim,
+    } = filtros;
 
- 
-  if (
-    quantidadeMinima !== undefined &&
-    quantidadeMaxima !== undefined &&
-    quantidadeMinima > quantidadeMaxima
-  ) {
-    throw new BadRequestException('A quantidade mínima não pode ser maior que a máxima.');
-  }
-  if (dataInicio && dataFim && dataInicio > dataFim) {
-    throw new BadRequestException('A data inicial não pode ser depois da data final.');
-  }
+    if (
+      quantidadeMinima !== undefined &&
+      quantidadeMaxima !== undefined &&
+      quantidadeMinima > quantidadeMaxima
+    ) {
+      throw new BadRequestException(
+        'A quantidade mínima não pode ser maior que a máxima.',
+      );
+    }
+    if (dataInicio && dataFim && dataInicio > dataFim) {
+      throw new BadRequestException(
+        'A data inicial não pode ser depois da data final.',
+      );
+    }
 
-  
-  const consulta = this.dataSource
-    .createQueryBuilder(MovimentacaoEstoque, 'me')
-    .innerJoin(Lote, 'l', 'l.id = me.loteId')
-    .innerJoin(Produto, 'p', 'p.id = l.produtoId')
-    .innerJoin(Usuario, 'u', 'u.id = me.usuarioId');
+    const consulta = this.dataSource
+      .createQueryBuilder(MovimentacaoEstoque, 'me')
+      .innerJoin(Lote, 'l', 'l.id = me.loteId')
+      .innerJoin(Produto, 'p', 'p.id = l.produtoId')
+      .innerJoin(Usuario, 'u', 'u.id = me.usuarioId');
 
- 
-  if (produtoId !== undefined) {
-    consulta.andWhere('l.produtoId = :produtoId', { produtoId });
-  }
-  if (tipo) {
-    consulta.andWhere('me.tipoMovimentacao = :tipo', { tipo });
-  }
-  if (motivo) {
-    consulta.andWhere('me.motivo = :motivo', { motivo });
-  }
-  if (usuarioId !== undefined) {
-    consulta.andWhere('me.usuarioId = :usuarioId', { usuarioId });
-  }
-  if (quantidadeMinima !== undefined) {
-    consulta.andWhere('me.quantidade >= :quantidadeMinima', { quantidadeMinima });
-  }
-  if (quantidadeMaxima !== undefined) {
-    consulta.andWhere('me.quantidade <= :quantidadeMaxima', { quantidadeMaxima });
-  }
-  if (dataInicio) {
-    consulta.andWhere('me.dataMovimentacao >= cast(:dataInicio as date)', { dataInicio });
-  }
-  if (dataFim) {
-    consulta.andWhere('me.dataMovimentacao < cast(:dataFim as date) + 1', { dataFim });
-  }
+    if (produtoId !== undefined) {
+      consulta.andWhere('l.produtoId = :produtoId', { produtoId });
+    }
+    if (tipo) {
+      consulta.andWhere('me.tipoMovimentacao = :tipo', { tipo });
+    }
+    if (motivo) {
+      consulta.andWhere('me.motivo = :motivo', { motivo });
+    }
+    if (usuarioId !== undefined) {
+      consulta.andWhere('me.usuarioId = :usuarioId', { usuarioId });
+    }
+    if (quantidadeMinima !== undefined) {
+      consulta.andWhere('me.quantidade >= :quantidadeMinima', {
+        quantidadeMinima,
+      });
+    }
+    if (quantidadeMaxima !== undefined) {
+      consulta.andWhere('me.quantidade <= :quantidadeMaxima', {
+        quantidadeMaxima,
+      });
+    }
+    if (dataInicio) {
+      consulta.andWhere('me.dataMovimentacao >= cast(:dataInicio as date)', {
+        dataInicio,
+      });
+    }
+    if (dataFim) {
+      consulta.andWhere('me.dataMovimentacao < cast(:dataFim as date) + 1', {
+        dataFim,
+      });
+    }
 
-  const total = await consulta.getCount();
+    const total = await consulta.getCount();
 
-  
-  const dados = await consulta
-    .select('me.id', 'id')
-    .addSelect('me.tipoMovimentacao', 'tipo')
-    .addSelect('me.motivo', 'motivo')
-    .addSelect('me.quantidade', 'quantidade')
-    .addSelect('me.valorUnitario', 'valorUnitario')
-    .addSelect('me.dataMovimentacao', 'dataMovimentacao')
-    .addSelect('me.observacao', 'observacao')
-    .addSelect('p.id', 'produtoId')
-    .addSelect('p.nome', 'produtoNome')
-    .addSelect('l.id', 'loteId')
-    .addSelect('l.codigoLote', 'codigoLote')
-    .addSelect('u.nome', 'usuarioNome')
-    .addSelect('me.localOrigemId', 'localOrigemId')
-    .addSelect('me.localDestinoId', 'localDestinoId')
-    .orderBy('me.dataMovimentacao', 'DESC')
-    .addOrderBy('me.id', 'DESC')
-    .offset((pagina - 1) * limite)
-    .limit(limite)
-    .getRawMany<MovimentacaoHistorico>();
+    const dados = await consulta
+      .select('me.id', 'id')
+      .addSelect('me.tipoMovimentacao', 'tipo')
+      .addSelect('me.motivo', 'motivo')
+      .addSelect('me.quantidade', 'quantidade')
+      .addSelect('me.valorUnitario', 'valorUnitario')
+      .addSelect('me.dataMovimentacao', 'dataMovimentacao')
+      .addSelect('me.observacao', 'observacao')
+      .addSelect('p.id', 'produtoId')
+      .addSelect('p.nome', 'produtoNome')
+      .addSelect('l.id', 'loteId')
+      .addSelect('l.codigoLote', 'codigoLote')
+      .addSelect('u.nome', 'usuarioNome')
+      .addSelect('me.localOrigemId', 'localOrigemId')
+      .addSelect('me.localDestinoId', 'localDestinoId')
+      .orderBy('me.dataMovimentacao', 'DESC')
+      .addOrderBy('me.id', 'DESC')
+      .offset((pagina - 1) * limite)
+      .limit(limite)
+      .getRawMany<MovimentacaoHistorico>();
 
-  return { dados, total, pagina, limite };
-}
+    return { dados, total, pagina, limite };
+  }
 }

@@ -11,6 +11,8 @@ import { LocalProduto } from '../produtos/local-produto.entity.js';
 import { Fornecedor } from '../fornecedores/fornecedor.entity.js';
 import { MovimentacoesController } from './movimentacoes.controller.js';
 import { MovimentacoesService } from './movimentacoes.service.js';
+import { EstoqueService } from './estoque.service.js';
+import { EstoqueController } from './estoque.controller.js';
 
 @Module({
   imports: [
@@ -26,7 +28,7 @@ import { MovimentacoesService } from './movimentacoes.service.js';
     ]),
     AuthModule,
   ],
-  controllers: [MovimentacoesController],
-  providers: [MovimentacoesService],
+  controllers: [MovimentacoesController, EstoqueController],
+  providers: [MovimentacoesService, EstoqueService],
 })
 export class MovimentacoesModule {}
