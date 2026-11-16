@@ -11,6 +11,21 @@ import type { ProdutoPublico } from './produto-publico.interface.js';
 import { EstoqueProduto } from './estoque-produto.entity.js';
 import { Lote } from './lote.entity.js';
 import { LocalProduto } from './local-produto.entity.js';
+import { Categoria } from '../categorias/categoria.entity.js';
+import { FiltrarProdutosDto } from './dto/filtrar-produtos.dto.js';
+import { Paginado } from '../common/interface/paginado.interface.js';
+import { ProdutoListagem } from './produto-listagem.interface.js';
+
+const SQL_ESTOQUE_BAIXO = 'ep.quantidade_total < p.estoque_minimo';
+
+const SQL_PROXIMO_DO_VENCIMENTO = `exists (
+  select 1
+  from lotes l2
+  join estoques_atuais ea on ea.lote_id = l2.id
+  where l2.produto_id = p.id
+    and ea.quantidade > 0
+    and l2.data_vencimento <= current_date + 30
+)`;
 
 @Injectable()
 export class ProdutosService {
@@ -107,5 +122,78 @@ export class ProdutosService {
       }
       throw erro;
     }
+  }
+
+  async listar(
+    filtros: FiltrarProdutosDto,
+  ): Promise<Paginado<ProdutoListagem>> {
+    const {
+      pagina,
+      limite,
+      nome,
+      categoriaId,
+      ativo,
+      precoMinimo,
+      precoMaximo,
+      destaque,
+    } = filtros;
+
+    if (
+      precoMinimo !== undefined &&
+      precoMaximo !== undefined &&
+      precoMinimo > precoMaximo
+    ) {
+      throw new BadRequestException(
+        'O preço mínimo não pode ser maior que o máximo.',
+      );
+    }
+
+    const consulta = this.dataSource
+      .createQueryBuilder(Produto, 'p')
+      .innerJoin(EstoqueProduto, 'ep', 'ep.produtoId = p.id')
+      .innerJoin(Categoria, 'c', 'c.id = p.categoriaId');
+
+    if (nome) {
+      consulta.andWhere('p.nome ilike :nome', { nome: `%${nome}%` });
+    }
+    if (categoriaId !== undefined) {
+      consulta.andWhere('p.categoriaId = :categoriaId', { categoriaId });
+    }
+    if (ativo !== undefined) {
+      consulta.andWhere('p.ativo = :ativo', { ativo });
+    }
+    if (precoMinimo !== undefined) {
+      consulta.andWhere('p.precoVendaAtual >= :precoMinimo', { precoMinimo });
+    }
+    if (precoMaximo !== undefined) {
+      consulta.andWhere('p.precoVendaAtual <= :precoMaximo', { precoMaximo });
+    }
+    if (destaque === 'ESTOQUE_BAIXO') {
+      consulta.andWhere(SQL_ESTOQUE_BAIXO);
+    }
+    if (destaque === 'VENCENDO') {
+      consulta.andWhere(SQL_PROXIMO_DO_VENCIMENTO);
+    }
+
+    const total = await consulta.getCount();
+
+    const dados = await consulta
+      .select('p.id', 'id')
+      .addSelect('p.codigo', 'codigo')
+      .addSelect('p.nome', 'nome')
+      .addSelect('c.nome', 'categoriaNome')
+      .addSelect('p.precoVendaAtual', 'precoVendaAtual')
+      .addSelect('p.ativo', 'ativo')
+      .addSelect('p.perecivel', 'perecivel')
+      .addSelect('ep.quantidadeTotal', 'quantidadeTotal')
+      .addSelect('p.estoqueMinimo', 'estoqueMinimo')
+      .addSelect(SQL_ESTOQUE_BAIXO, 'estoqueBaixo')
+      .addSelect(SQL_PROXIMO_DO_VENCIMENTO, 'proximoDoVencimento')
+      .orderBy('p.nome', 'ASC')
+      .offset((pagina - 1) * limite)
+      .limit(limite)
+      .getRawMany<ProdutoListagem>();
+
+    return { dados, total, pagina, limite };
   }
 }

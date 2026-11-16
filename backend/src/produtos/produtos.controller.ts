@@ -1,7 +1,9 @@
 import {
   Body,
   Controller,
+  Get,
   Post,
+  Query,
   Req,
   UnauthorizedException,
   UseGuards,
@@ -13,6 +15,7 @@ import { Perfis } from '../auth/perfis.decorator.js';
 import type { RequestComUsuario } from '../auth/payload-jwt.interface.js';
 import { CriarProdutoDto } from './dto/criar-produto.dto.js';
 import { ProdutosService } from './produtos.service.js';
+import { FiltrarProdutosDto } from './dto/filtrar-produtos.dto.js';
 
 @Controller('produtos')
 export class ProdutosController {
@@ -26,5 +29,11 @@ export class ProdutosController {
     }
 
     return this.produtosService.cadastrar(dto, request.usuario.sub);
+  }
+
+  @Get()
+  @UseGuards(JwtAuthGuard, PerfisGuard)
+  listar(@Query() filtros: FiltrarProdutosDto) {
+    return this.produtosService.listar(filtros);
   }
 }
