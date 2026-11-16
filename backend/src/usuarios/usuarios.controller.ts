@@ -17,6 +17,7 @@ import { PerfisGuard } from '../auth/perfis.guard.js';
 import { Perfis } from '../auth/perfis.decorator.js';
 import { TipoUsuario } from './tipo-usuario.enum.js';
 import { AtualizarAtivacaoDto } from './dto/atualizar-ativacao.dto.js';
+import { AtualizarUsuarioDto } from './dto/atualizar-usuario.dto.js';
 
 @Controller('usuarios')
 export class UsuariosController {
@@ -49,5 +50,15 @@ export class UsuariosController {
     @Body() dto: AtualizarAtivacaoDto,
   ) {
     return this.usuariosService.atualizarAtivacao(id, dto);
+  }
+
+  @Patch(':id')
+  @UseGuards(JwtAuthGuard, PerfisGuard)
+  @Perfis(TipoUsuario.ADMINISTRADOR)
+  atualizar(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: AtualizarUsuarioDto,
+  ) {
+    return this.usuariosService.atualizar(id, dto);
   }
 }

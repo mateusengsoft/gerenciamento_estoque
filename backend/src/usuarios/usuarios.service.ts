@@ -19,6 +19,7 @@ import type { UsuarioPublico } from './usuario-publico.interface.js';
 import { PaginacaoDto } from '../common/dto/paginacao.dto.js';
 import type { Paginado } from '../common/interface/paginado.interface.js';
 import { AtualizarAtivacaoDto } from './dto/atualizar-ativacao.dto.js';
+import { AtualizarUsuarioDto } from './dto/atualizar-usuario.dto.js';
 
 @Injectable()
 export class UsuariosService {
@@ -260,5 +261,52 @@ export class UsuariosService {
     });
 
     return atualizado;
+  }
+
+  async atualizar(
+    id: number,
+    dto: AtualizarUsuarioDto,
+  ): Promise<UsuarioPublico> {
+    if (dto.nome === undefined && dto.email === undefined) {
+      throw new BadRequestException(
+        'Informe ao menos um campo para atualizar.',
+      );
+    }
+
+    const existente = await this.usuariosRepository.findOne({
+      where: { id },
+      select: { id: true, login: true },
+    });
+
+    if (!existente || existente.login === 'sistema') {
+      throw new NotFoundException('Usuário não encontrado.');
+    }
+
+    try {
+      await this.usuariosRepository.update(id, {
+        nome: dto.nome,
+        email: dto.email?.toLowerCase(),
+      });
+    } catch (erro) {
+      if (
+        erro instanceof QueryFailedError &&
+        (erro.driverError as { code?: string }).code === '23505'
+      ) {
+        throw new ConflictException('E-mail já cadastrado para outro usuário.');
+      }
+      throw erro;
+    }
+
+    return await this.usuariosRepository.findOneOrFail({
+      where: { id },
+      select: {
+        id: true,
+        login: true,
+        nome: true,
+        email: true,
+        tipo: true,
+        ativo: true,
+      },
+    });
   }
 }
