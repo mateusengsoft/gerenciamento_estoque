@@ -1,7 +1,9 @@
 import {
   Body,
   Controller,
+  Get,
   Post,
+  Query,
   Req,
   UnauthorizedException,
   UseGuards,
@@ -12,6 +14,7 @@ import type { RequestComUsuario } from '../auth/payload-jwt.interface.js';
 import { CriarEntradaDto } from './dto/criar-entrada.dto.js';
 import { MovimentacoesService } from './movimentacoes.service.js';
 import { CriarSaidaDto } from './dto/criar-saida.dto.js';
+import { FiltrarMovimentacoesDto } from './dto/filtrar-movimentacoes.dto.js';
 
 @Controller('movimentacoes')
 export class MovimentacoesController {
@@ -44,4 +47,10 @@ export class MovimentacoesController {
       request.usuario.sub,
     );
   }
+
+  @Get()
+@UseGuards(JwtAuthGuard, PerfisGuard)
+listarHistorico(@Query() filtros: FiltrarMovimentacoesDto) {
+  return this.movimentacoesService.listarHistorico(filtros);
+}
 }
