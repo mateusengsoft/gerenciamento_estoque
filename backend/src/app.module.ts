@@ -37,7 +37,7 @@ import { MovimentacoesModule } from './movimentacoes/movimentacoes.module.js';
     LocaisModule,
     FornecedoresModule,
     ProdutosModule,
-    MovimentacoesModule,  
+    MovimentacoesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -2,6 +2,8 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
+  InternalServerErrorException,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import { DataSource, QueryFailedError } from 'typeorm';
 import { CriarEntradaDto } from './dto/criar-entrada.dto.js';
@@ -13,7 +15,17 @@ import { Aquisicao } from './aquisicao.entity.js';
 import { MovimentacaoEstoque } from './movimentacao-estoque.entity.js';
 import { TipoMovimentacao } from './tipo-movimentacao.enum.js';
 import { MotivoMovimentacao } from './motivo-movimentacao.enum.js';
+import { MovimentacaoAquisicao } from './movimentacao-aquisicao.entity.js';
+import { CriarSaidaDto } from './dto/criar-saida.dto.js';
 
+// Converte uma quantidade para milésimos inteiros (15.5 → 15500),
+// para fazer as contas sem os erros de arredondamento do number.
+const paraMilesimos = (valor: number | string): number =>
+  Math.round(Number(valor) * 1000);
+
+// Converte de volta para o formato do numeric(10,3) (15500 → '15.500').
+const deMilesimos = (milesimos: number): string =>
+  (milesimos / 1000).toFixed(3);
 @Injectable()
 export class MovimentacoesService {
   constructor(private readonly dataSource: DataSource) {}
@@ -165,5 +177,124 @@ export class MovimentacoesService {
       }
       throw erro;
     }
+  }
+
+  async registrarSaida(dto: CriarSaidaDto, usuarioId: number) {
+    const ehVenda = dto.motivo === MotivoMovimentacao.VENDA;
+
+    if (ehVenda && dto.valorUnitario === undefined) {
+      throw new BadRequestException('Informe o valor unitário da venda.');
+    }
+    if (!ehVenda && dto.valorUnitario !== undefined) {
+      throw new BadRequestException(
+        'Perdas e vencimentos não têm valor unitário.',
+      );
+    }
+    if (new Date(dto.dataMovimentacao) > new Date()) {
+      throw new BadRequestException(
+        'A data da movimentação não pode estar no futuro.',
+      );
+    }
+
+    return this.dataSource.transaction(async (manager) => {
+      const [saldo]: { quantidade: string; suficiente: boolean }[] =
+        await manager.query(
+          `select quantidade, quantidade >= $3 as suficiente
+       from estoques_atuais
+       where lote_id = $1 and local_id = $2
+       for update`,
+          [dto.loteId, dto.localOrigemId, dto.quantidade],
+        );
+      if (!saldo || !saldo.suficiente) {
+        throw new UnprocessableEntityException(
+          `Saldo insuficiente. Disponível: ${saldo?.quantidade ?? '0'}.`,
+        );
+      }
+
+      const lote = await manager.findOneOrFail(Lote, {
+        where: { id: dto.loteId },
+        select: { id: true, produtoId: true },
+      });
+      const produto = await manager.findOneOrFail(Produto, {
+        where: { id: lote.produtoId },
+        select: { id: true, ativo: true },
+      });
+      if (!produto.ativo) {
+        throw new BadRequestException(
+          'Produto inativo não pode receber movimentações.',
+        );
+      }
+
+      const movimentacao = await manager.save(MovimentacaoEstoque, {
+        tipoMovimentacao: TipoMovimentacao.SAIDA,
+        motivo: dto.motivo,
+        quantidade: dto.quantidade.toString(),
+        dataMovimentacao: new Date(dto.dataMovimentacao),
+        valorUnitario: dto.valorUnitario?.toString(),
+        loteId: dto.loteId,
+        localOrigemId: dto.localOrigemId,
+        usuarioId,
+        observacao: dto.observacao,
+      });
+
+      const origens: {
+        entrada_id: number;
+        aquisicao_id: number;
+        disponivel: string;
+      }[] = await manager.query(
+        `select me.id as entrada_id,
+                me.aquisicao_id,
+                me.quantidade - coalesce(sum(ma.quantidade), 0) as disponivel
+         from movimentacoes_estoque me
+         left join movimentacoes_aquisicoes ma
+                on ma.movimentacao_disponibilizacao_id = me.id
+         where me.tipo_movimentacao = 'ENTRADA'
+           and me.lote_id = $1
+           and me.local_destino_id = $2
+         group by me.id
+         having me.quantidade - coalesce(sum(ma.quantidade), 0) > 0
+         order by me.data_criacao, me.id`,
+        [dto.loteId, dto.localOrigemId],
+      );
+
+      let restante = paraMilesimos(dto.quantidade);
+
+      for (const origem of origens) {
+        if (restante === 0) {
+          break;
+        }
+        const consumir = Math.min(restante, paraMilesimos(origem.disponivel));
+
+        await manager.save(MovimentacaoAquisicao, {
+          movimentacaoId: movimentacao.id,
+          aquisicaoId: origem.aquisicao_id,
+          movimentacaoDisponibilizacaoId: origem.entrada_id,
+          quantidade: deMilesimos(consumir),
+        });
+
+        restante -= consumir;
+      }
+
+      if (restante > 0) {
+        throw new InternalServerErrorException(
+          'O saldo do lote não confere com o histórico de entradas.',
+        );
+      }
+
+      await manager.query(
+        `update estoques_atuais
+       set quantidade = quantidade - $3
+       where lote_id = $1 and local_id = $2`,
+        [dto.loteId, dto.localOrigemId, dto.quantidade],
+      );
+      await manager.query(
+        `update estoques_produtos
+       set quantidade_total = quantidade_total - $1
+       where produto_id = $2`,
+        [dto.quantidade, lote.produtoId],
+      );
+
+      return { movimentacaoId: movimentacao.id };
+    });
   }
 }

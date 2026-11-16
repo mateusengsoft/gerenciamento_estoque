@@ -11,6 +11,7 @@ import { PerfisGuard } from '../auth/perfis.guard.js';
 import type { RequestComUsuario } from '../auth/payload-jwt.interface.js';
 import { CriarEntradaDto } from './dto/criar-entrada.dto.js';
 import { MovimentacoesService } from './movimentacoes.service.js';
+import { CriarSaidaDto } from './dto/criar-saida.dto.js';
 
 @Controller('movimentacoes')
 export class MovimentacoesController {
@@ -27,5 +28,20 @@ export class MovimentacoesController {
     }
 
     return this.movimentacoesService.registrarEntrada(dto, request.usuario.sub);
+  }
+
+  @Post('saidas')
+  @UseGuards(JwtAuthGuard, PerfisGuard)
+  async registrarSaida(
+    @Body() dto: CriarSaidaDto,
+    @Req() request: RequestComUsuario,
+  ) {
+    if (!request.usuario) {
+      throw new UnauthorizedException();
+    }
+    return await this.movimentacoesService.registrarSaida(
+      dto,
+      request.usuario.sub,
+    );
   }
 }
