@@ -1,8 +1,8 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { mapStores } from 'pinia'
-import  { useAuthStore } from '@/stores/auth'
-import { ErroApi } from '@/services/api';
+import { useAuthStore } from '@/stores/auth'
+import { ErroApi } from '@/services/api'
 
 export default defineComponent({
   name: 'LoginView',
@@ -13,7 +13,7 @@ export default defineComponent({
       senha: '',
       erro: '',
       carregando: false,
-     mostrarSenha: false,
+      mostrarSenha: false,
     }
   },
 
@@ -42,8 +42,6 @@ export default defineComponent({
         this.carregando = false
       }
     },
-
-
   },
 })
 </script>
@@ -60,9 +58,13 @@ export default defineComponent({
 
       <label>
         Senha
-        <input v-model="senha" :type="mostrarSenha ? 'text': 'password'" autocomplete="current-password" />
+        <input
+          v-model="senha"
+          :type="mostrarSenha ? 'text' : 'password'"
+          autocomplete="current-password"
+        />
         <label class="mostrar-senha">
-         <input v-model="mostrarSenha" type="checkbox" />
+          <input v-model="mostrarSenha" type="checkbox" />
         </label>
       </label>
 

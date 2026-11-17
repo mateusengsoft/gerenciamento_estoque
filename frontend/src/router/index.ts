@@ -1,7 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
-
 declare module 'vue-router' {
   interface RouteMeta {
     publica?: boolean
@@ -22,16 +21,13 @@ const router = createRouter({
   ],
 })
 
-
 router.beforeEach((destino) => {
   const auth = useAuthStore()
-
 
   if (!destino.meta.publica && !auth.estaLogado) {
     auth.sair()
     return { name: 'login' }
   }
-
 
   if (destino.name === 'login' && auth.estaLogado) {
     return { name: 'produtos' }

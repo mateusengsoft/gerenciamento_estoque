@@ -1,6 +1,5 @@
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000'
 
-
 export class ErroApi extends Error {
   readonly status: number
 
@@ -31,7 +30,6 @@ export async function requisitar<T>(caminho: string, opcoes: OpcoesRequisicao = 
     body: opcoes.corpo !== undefined ? JSON.stringify(opcoes.corpo) : undefined,
   })
 
-  
   const dados = await resposta.json().catch(() => null)
 
   if (!resposta.ok) {
