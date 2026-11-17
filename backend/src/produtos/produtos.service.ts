@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, QueryFailedError, Repository } from 'typeorm';
@@ -15,6 +16,7 @@ import { Categoria } from '../categorias/categoria.entity.js';
 import { FiltrarProdutosDto } from './dto/filtrar-produtos.dto.js';
 import { Paginado } from '../common/interface/paginado.interface.js';
 import { ProdutoListagem } from './produto-listagem.interface.js';
+import { AtualizarProdutoDto } from './dto/atualizar-produto.dto.js';
 
 const SQL_ESTOQUE_BAIXO = 'ep.quantidade_total < p.estoque_minimo';
 
@@ -195,5 +197,48 @@ export class ProdutosService {
       .getRawMany<ProdutoListagem>();
 
     return { dados, total, pagina, limite };
+  }
+
+  async atualizar(
+    id: number,
+    dto: AtualizarProdutoDto,
+  ): Promise<ProdutoPublico> {
+    const nenhumCampo = Object.values(dto).every(
+      (valor) => valor === undefined,
+    );
+    if (nenhumCampo) {
+      throw new BadRequestException(
+        'Informe ao menos um campo para atualizar.',
+      );
+    }
+
+    const existe = await this.produtosRepository.exists({ where: { id } });
+    if (!existe) {
+      throw new NotFoundException('Produto não encontrado.');
+    }
+
+    try {
+      await this.produtosRepository.update(id, {
+        nome: dto.nome,
+        descricao: dto.descricao,
+        precoVendaAtual: dto.precoVendaAtual?.toString(),
+        categoriaId: dto.categoriaId,
+        estoqueMinimo: dto.estoqueMinimo?.toString(),
+        ativo: dto.ativo,
+      });
+    } catch (erro) {
+      if (
+        erro instanceof QueryFailedError &&
+        (erro.driverError as { code?: string }).code === '23503'
+      ) {
+        throw new BadRequestException('Categoria informada não existe.');
+      }
+      throw erro;
+    }
+
+    return await this.produtosRepository.findOneOrFail({
+      where: { id },
+      select: { id: true, nome: true, codigo: true, ativo: true },
+    });
   }
 }

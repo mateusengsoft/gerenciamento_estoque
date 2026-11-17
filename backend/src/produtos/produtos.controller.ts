@@ -2,6 +2,9 @@ import {
   Body,
   Controller,
   Get,
+  Param,
+  ParseIntPipe,
+  Patch,
   Post,
   Query,
   Req,
@@ -16,6 +19,7 @@ import type { RequestComUsuario } from '../auth/payload-jwt.interface.js';
 import { CriarProdutoDto } from './dto/criar-produto.dto.js';
 import { ProdutosService } from './produtos.service.js';
 import { FiltrarProdutosDto } from './dto/filtrar-produtos.dto.js';
+import { AtualizarProdutoDto } from './dto/atualizar-produto.dto.js';
 
 @Controller('produtos')
 export class ProdutosController {
@@ -35,5 +39,14 @@ export class ProdutosController {
   @UseGuards(JwtAuthGuard, PerfisGuard)
   listar(@Query() filtros: FiltrarProdutosDto) {
     return this.produtosService.listar(filtros);
+  }
+  @Patch(':id')
+  @UseGuards(JwtAuthGuard, PerfisGuard)
+  @Perfis(TipoUsuario.ADMINISTRADOR)
+  atualizar(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: AtualizarProdutoDto,
+  ) {
+    return this.produtosService.atualizar(id, dto);
   }
 }
