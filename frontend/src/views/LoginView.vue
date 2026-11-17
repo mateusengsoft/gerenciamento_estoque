@@ -13,6 +13,7 @@ export default defineComponent({
       senha: '',
       erro: '',
       carregando: false,
+     mostrarSenha: false,
     }
   },
 
@@ -41,6 +42,8 @@ export default defineComponent({
         this.carregando = false
       }
     },
+
+
   },
 })
 </script>
@@ -57,7 +60,10 @@ export default defineComponent({
 
       <label>
         Senha
-        <input v-model="senha" type="password" autocomplete="current-password" />
+        <input v-model="senha" :type="mostrarSenha ? 'text': 'password'" autocomplete="current-password" />
+        <label class="mostrar-senha">
+         <input v-model="mostrarSenha" type="checkbox" />
+        </label>
       </label>
 
       <p v-if="erro" class="erro">{{ erro }}</p>
