@@ -49,4 +49,16 @@ export class ProdutosController {
   ) {
     return this.produtosService.atualizar(id, dto);
   }
+
+  @Get(':id/lotes')
+  @UseGuards(JwtAuthGuard, PerfisGuard)
+  listarLotes(@Param('id', ParseIntPipe) id: number) {
+    return this.produtosService.listarLotes(id);
+  }
+
+  @Get(':id/locais')
+  @UseGuards(JwtAuthGuard, PerfisGuard)
+  listarLocais(@Param('id', ParseIntPipe) id: number) {
+    return this.produtosService.listarLocais(id);
+  }
 }

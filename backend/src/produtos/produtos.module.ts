@@ -7,10 +7,17 @@ import { LocalProduto } from './local-produto.entity.js';
 import { AuthModule } from '../auth/auth.module.js';
 import { ProdutosController } from './produtos.controller.js';
 import { ProdutosService } from './produtos.service.js';
+import { Local } from '../locais/local.entity.js';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Produto, Lote, EstoqueProduto, LocalProduto]),
+    TypeOrmModule.forFeature([
+      Produto,
+      Lote,
+      EstoqueProduto,
+      LocalProduto,
+      Local,
+    ]),
     AuthModule,
   ],
   controllers: [ProdutosController],

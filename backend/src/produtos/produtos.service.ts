@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, QueryFailedError, Repository } from 'typeorm';
+import { DataSource, In, QueryFailedError, Repository } from 'typeorm';
 import { Produto } from './produto.entity.js';
 import { CriarProdutoDto } from './dto/criar-produto.dto.js';
 import type { ProdutoPublico } from './produto-publico.interface.js';
@@ -17,6 +17,7 @@ import { FiltrarProdutosDto } from './dto/filtrar-produtos.dto.js';
 import { Paginado } from '../common/interface/paginado.interface.js';
 import { ProdutoListagem } from './produto-listagem.interface.js';
 import { AtualizarProdutoDto } from './dto/atualizar-produto.dto.js';
+import { Local } from '../locais/local.entity.js';
 
 const SQL_ESTOQUE_BAIXO = 'ep.quantidade_total < p.estoque_minimo';
 
@@ -35,6 +36,15 @@ export class ProdutosService {
     @InjectRepository(Produto)
     private readonly produtosRepository: Repository<Produto>,
     private readonly dataSource: DataSource,
+
+    @InjectRepository(Lote)
+    private readonly lotesRepository: Repository<Lote>,
+
+    @InjectRepository(Local)
+    private readonly locaisRepository: Repository<Local>,
+
+    @InjectRepository(LocalProduto)
+    private readonly localProdutosRepository: Repository<LocalProduto>,
   ) {}
 
   async cadastrar(
@@ -240,5 +250,47 @@ export class ProdutosService {
       where: { id },
       select: { id: true, nome: true, codigo: true, ativo: true },
     });
+  }
+
+  async listarLotes(id: number): Promise<Lote[]> {
+    const existe = await this.produtosRepository.exists({ where: { id } });
+    if (!existe) {
+      throw new NotFoundException('Produto não encontrado.');
+    }
+    const lotes = await this.lotesRepository.find({
+      where: { produtoId: id },
+      select: {
+        id: true,
+        codigoLote: true,
+        dataFabricacao: true,
+        dataVencimento: true,
+      },
+      order: { dataVencimento: 'ASC' },
+    });
+
+    return lotes;
+  }
+
+  async listarLocais(id: number): Promise<Local[]> {
+    const existe = await this.produtosRepository.exists({ where: { id } });
+    if (!existe) {
+      throw new NotFoundException('Produto não encontrado.');
+    }
+
+    const associacoesLocalProdutos = await this.localProdutosRepository.find({
+      where: { produtoId: id },
+      select: { localId: true },
+    });
+    const idsLocalProdutos = associacoesLocalProdutos.map((a) => a.localId);
+    const locais =
+      idsLocalProdutos.length > 0
+        ? await this.locaisRepository.find({
+            where: { id: In(idsLocalProdutos) },
+            select: { id: true, corredor: true, secao: true, prateleira: true },
+            order: { corredor: 'ASC', prateleira: 'ASC', secao: 'ASC' },
+          })
+        : [];
+
+    return locais;
   }
 }
