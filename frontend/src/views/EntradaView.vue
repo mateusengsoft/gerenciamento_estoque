@@ -147,6 +147,15 @@ export default defineComponent({
           },
         )
         this.sucesso = 'Entrada registrada.'
+        this.formulario.produtoId = null
+        this.formulario.quantidade = null
+        this.formulario.valorUnitario = null
+        this.formulario.observacao = ''
+        this.novoLote.codigoLote =''
+        this.novoLote.dataFabricacao =''
+        this.novoLote.dataVencimento =''
+        this.modoLote = 'existente'
+        this.carregarDadosDoProduto()
       } catch (erro) {
         if (erro instanceof ErroApi) {
           this.erro = erro.message
