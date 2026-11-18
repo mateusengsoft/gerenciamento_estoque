@@ -46,6 +46,14 @@ export default defineComponent({
       this.authStore.sair()
       await this.$router.push('/login')
     },
+
+    formatarPreco(valor: string): string {
+      return Number(valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+    },
+
+    formatarQuantidade(valor: string): string {
+      return Number(valor).toLocaleString('pt-BR', { maximumFractionDigits: 3 })
+    },
   },
 })
 </script>
@@ -67,22 +75,28 @@ export default defineComponent({
           <th>Categoria</th>
           <th>Preço</th>
           <th>Estoque</th>
+          <th>Situação</th>
         </tr>
       </thead>
       <tbody>
-
         <tr v-for="produto in produtos" :key="produto.id">
-
           <td>{{ produto.codigo }}</td>
           <td>{{ produto.nome }}</td>
           <td>
             {{ produto.categoriaNome }}
           </td>
           <td>
-            {{ produto.precoVendaAtual }}
+            {{ formatarPreco(produto.precoVendaAtual) }}
           </td>
           <td>
-            {{ produto.quantidadeTotal }}
+            {{ formatarQuantidade(produto.quantidadeTotal) }}
+          </td>
+          <td>
+            <span v-if="produto.estoqueBaixo" class="etiqueta">
+              Estoque abaixo de {{ formatarQuantidade(produto.estoqueMinimo) }}</span
+            >
+            <span v-if="!produto.ativo" class="etiqueta">O produto está inativo </span>
+            <span v-if="produto.proximoDoVencimento" class="etiqueta">Vencendo </span>
           </td>
         </tr>
       </tbody>
@@ -90,3 +104,14 @@ export default defineComponent({
     <button @click="sair">Sair</button>
   </main>
 </template>
+
+<style scoped>
+.etiqueta {
+  display: inline-block;
+  padding: 2px 8px;
+  margin-right: 4px;
+  border-radius: 12px;
+  font-size: 12px;
+  background: #fef3c7;
+}
+</style>
