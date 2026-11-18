@@ -18,6 +18,8 @@ const router = createRouter({
       meta: { publica: true },
     },
     { path: '/produtos', name: 'produtos', component: () => import('@/views/ProdutosView.vue') },
+
+    { path: '/entradas', name: 'entradas', component: () => import('@/views/EntradaView.vue') },
   ],
 })
 
