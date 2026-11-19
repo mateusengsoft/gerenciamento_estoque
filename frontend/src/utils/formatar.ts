@@ -24,3 +24,10 @@ export function formatarData(valor: string | null): string {
 export function formatarDataHora(valor: string): string {
   return new Date(valor).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })
 }
+
+export function hojeLocal(): string {
+  const agora = new Date()
+  const mes = String(agora.getMonth() + 1).padStart(2, '0')
+  const dia = String(agora.getDate()).padStart(2, '0')
+  return `${agora.getFullYear()}-${mes}-${dia}`
+}

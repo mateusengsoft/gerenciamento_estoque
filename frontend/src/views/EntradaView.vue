@@ -4,13 +4,7 @@ import { mapStores } from 'pinia'
 import { useAuthStore } from '@/stores/auth'
 import { requisitar, ErroApi } from '@/services/api'
 import type { FornecedorPublico, Local, Lote, Paginado, ProdutoListagem } from '@/types/api'
-
-function hojeLocal(): string {
-  const agora = new Date()
-  const mes = String(agora.getMonth() + 1).padStart(2, '0')
-  const dia = String(agora.getDate()).padStart(2, '0')
-  return `${agora.getFullYear()}-${mes}-${dia}`
-}
+import { hojeLocal } from '@/utils/formatar'
 
 export default defineComponent({
   name: 'EntradaView',
@@ -151,9 +145,9 @@ export default defineComponent({
         this.formulario.quantidade = null
         this.formulario.valorUnitario = null
         this.formulario.observacao = ''
-        this.novoLote.codigoLote =''
-        this.novoLote.dataFabricacao =''
-        this.novoLote.dataVencimento =''
+        this.novoLote.codigoLote = ''
+        this.novoLote.dataFabricacao = ''
+        this.novoLote.dataVencimento = ''
         this.modoLote = 'existente'
         this.carregarDadosDoProduto()
       } catch (erro) {
@@ -166,6 +160,7 @@ export default defineComponent({
         this.carregando = false
       }
     },
+    hojeLocal,
   },
 })
 </script>

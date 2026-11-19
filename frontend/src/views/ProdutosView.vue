@@ -48,7 +48,6 @@ export default defineComponent({
       }
     },
 
-
     formatarPreco,
     formatarQuantidade,
 
@@ -142,7 +141,6 @@ export default defineComponent({
         </tr>
       </tbody>
     </table>
-
   </main>
 </template>
 

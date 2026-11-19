@@ -23,6 +23,7 @@ const router = createRouter({
 
     { path: '/:caminho(.*)*', redirect: '/produtos' },
 
+    { path: '/saidas', name: 'saidas', component: () => import('@/views/SaidaView.vue') },
   ],
 })
 
