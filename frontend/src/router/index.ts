@@ -20,6 +20,9 @@ const router = createRouter({
     { path: '/produtos', name: 'produtos', component: () => import('@/views/ProdutosView.vue') },
 
     { path: '/entradas', name: 'entradas', component: () => import('@/views/EntradaView.vue') },
+
+    { path: '/:caminho(.*)*', redirect: '/produtos' },
+
   ],
 })
 

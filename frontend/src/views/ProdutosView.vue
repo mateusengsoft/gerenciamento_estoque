@@ -48,10 +48,6 @@ export default defineComponent({
       }
     },
 
-    async sair() {
-      this.authStore.sair()
-      await this.$router.push('/login')
-    },
 
     formatarPreco,
     formatarQuantidade,
@@ -146,7 +142,7 @@ export default defineComponent({
         </tr>
       </tbody>
     </table>
-    <button @click="sair">Sair</button>
+
   </main>
 </template>
 
