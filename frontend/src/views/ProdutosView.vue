@@ -4,6 +4,7 @@ import { mapStores } from 'pinia'
 import { useAuthStore } from '@/stores/auth'
 import { requisitar, ErroApi } from '@/services/api'
 import type { Paginado, ProdutoListagem } from '@/types/api'
+import { formatarPreco, formatarQuantidade } from '@/utils/formatar'
 
 export default defineComponent({
   name: 'ProdutosView',
@@ -52,13 +53,8 @@ export default defineComponent({
       await this.$router.push('/login')
     },
 
-    formatarPreco(valor: string): string {
-      return Number(valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
-    },
-
-    formatarQuantidade(valor: string): string {
-      return Number(valor).toLocaleString('pt-BR', { maximumFractionDigits: 3 })
-    },
+    formatarPreco,
+    formatarQuantidade,
 
     montarCaminho(): string {
       const parametros = new URLSearchParams()
