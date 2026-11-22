@@ -15,6 +15,12 @@ interface OpcoesRequisicao {
   token?: string | null
 }
 
+let aoSessaoExpirar: (() => void) | null = null
+
+export function definirAoSessaoExpirar(funcao: () => void) {
+  aoSessaoExpirar = funcao
+}
+
 export async function requisitar<T>(caminho: string, opcoes: OpcoesRequisicao = {}): Promise<T> {
   const cabecalhos: Record<string, string> = {}
   if (opcoes.corpo !== undefined) {
@@ -33,6 +39,9 @@ export async function requisitar<T>(caminho: string, opcoes: OpcoesRequisicao = 
   const dados = await resposta.json().catch(() => null)
 
   if (!resposta.ok) {
+    if (resposta.status === 401 && opcoes.token && aoSessaoExpirar) {
+      aoSessaoExpirar()
+    }
     const mensagem = Array.isArray(dados?.message)
       ? dados.message.join(' ')
       : (dados?.message ?? 'Erro ao comunicar com o servidor.')
