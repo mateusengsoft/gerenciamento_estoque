@@ -4,7 +4,7 @@ import { mapStores } from 'pinia'
 import { useAuthStore } from '@/stores/auth'
 import { requisitar, ErroApi } from '@/services/api'
 import type { FornecedorPublico, Local, Lote, Paginado, ProdutoListagem } from '@/types/api'
-import { hojeLocal } from '@/utils/formatar'
+import { formatarData, hojeLocal } from '@/utils/formatar'
 
 export default defineComponent({
   name: 'EntradaView',
@@ -149,7 +149,6 @@ export default defineComponent({
         this.novoLote.dataFabricacao = ''
         this.novoLote.dataVencimento = ''
         this.modoLote = 'existente'
-        this.carregarDadosDoProduto()
       } catch (erro) {
         if (erro instanceof ErroApi) {
           this.erro = erro.message
@@ -161,6 +160,7 @@ export default defineComponent({
       }
     },
     hojeLocal,
+    formatarData,
   },
 })
 </script>
@@ -205,7 +205,7 @@ export default defineComponent({
         <select v-if="modoLote === 'existente'" v-model="formulario.loteId">
           <option :value="null" disabled>Escolha um lote</option>
           <option v-for="lote in lotes" :key="lote.id" :value="lote.id">
-            {{ lote.codigoLote }} · {{ lote.dataVencimento }}
+            {{ lote.codigoLote }} · {{ formatarData(lote.dataVencimento) }}
           </option>
         </select>
         <section v-if="modoLote === 'novo'">

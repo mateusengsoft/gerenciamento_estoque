@@ -23,8 +23,8 @@ export default defineComponent({
   <nav class="barra">
     <RouterLink to="/produtos">Produtos</RouterLink>
     <RouterLink to="/entradas">Entrada</RouterLink>
-    <RouterLink to="/saidas">Saida</RouterLink>
-    <RouterLink to="/movimentacoes">Movimentacoes</RouterLink>
+    <RouterLink to="/saidas">Saída</RouterLink>
+    <RouterLink to="/movimentacoes">Histórico</RouterLink>
 
     <span class="espaco"></span>
     <span>{{ authStore.ehAdmin ? 'Administrador' : 'Operador' }}</span>

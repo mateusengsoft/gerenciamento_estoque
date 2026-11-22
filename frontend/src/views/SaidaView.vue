@@ -69,7 +69,7 @@ export default defineComponent({
         )
         this.produtos = respostaProdutos.dados
       } catch (erro) {
-        this.erro = erro instanceof ErroApi ? erro.message : 'Não foi possível conectar ao servidor'
+        this.erro = this.mensagemDeErro(erro)
       }
     },
 
@@ -100,13 +100,10 @@ export default defineComponent({
       }
     },
 
-    montarCorpo() {
-      if (this.posicaoEscolhida === null) {
-        throw new Error('Escolha o lote e o local de onde sai o produto.')
-      }
+    montarCorpo(posicao: PosicaoEstoque) {
       const corpo: Record<string, unknown> = {
-        loteId: this.posicaoEscolhida.loteId,
-        localOrigemId: this.posicaoEscolhida.localId,
+        loteId: posicao.loteId,
+        localOrigemId: posicao.localId,
         quantidade: this.formulario.quantidade,
         motivo: this.formulario.motivo,
         dataMovimentacao: this.formulario.dataMovimentacao,
@@ -133,10 +130,10 @@ export default defineComponent({
       try {
         await requisitar<{ movimentacaoId: number }>(`/movimentacoes/saidas`, {
           metodo: 'POST',
-          corpo: this.montarCorpo(),
+          corpo: this.montarCorpo(this.posicaoEscolhida),
           token: this.authStore.token,
         })
-        this.sucesso = 'Saída registrada'
+        this.sucesso = 'Saída registrada.'
         this.formulario.quantidade = null
         this.formulario.observacao = ''
         this.posicaoEscolhida = null
@@ -156,15 +153,17 @@ export default defineComponent({
 
 <template>
   <main>
-    <h1>Saida de estoque</h1>
+    <h1>Saída de estoque</h1>
     <form @submit.prevent="enviar">
-      <label> Produto </label>
-      <select v-model="formulario.produtoId">
-        <option :value="null" disabled>Escolha um produto</option>
-        <option v-for="produto in produtos" :key="produto.id" :value="produto.id">
-          {{ produto.codigo }} · {{ produto.nome }}
-        </option>
-      </select>
+      <label>
+        Produto
+        <select v-model="formulario.produtoId">
+          <option :value="null" disabled>Escolha um produto</option>
+          <option v-for="produto in produtos" :key="produto.id" :value="produto.id">
+            {{ produto.codigo }} · {{ produto.nome }}
+          </option>
+        </select>
+      </label>
       <p v-if="formulario.produtoId === null">Selecione um produto primeiro.</p>
 
       <p v-else-if="carregandoPosicoes">Carregando posições de estoque...</p>
@@ -220,7 +219,7 @@ export default defineComponent({
       <p v-if="sucesso" class="sucesso">{{ sucesso }}</p>
 
       <button type="submit" :disabled="carregando">
-        {{ carregando ? 'Registrando...' : 'Registrar saida' }}
+        {{ carregando ? 'Registrando...' : 'Registrar saída' }}
       </button>
     </form>
   </main>

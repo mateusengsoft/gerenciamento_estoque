@@ -170,6 +170,8 @@ export default defineComponent({
         this.total = resposta.total
       } catch (erro) {
         this.erro = this.mensagemDeErro(erro)
+        this.movimentacoes = []
+        this.total = 0
       } finally {
         this.carregando = false
       }
@@ -219,7 +221,7 @@ export default defineComponent({
         return 'Local não encontrado'
       }
 
-      return `Corredor ${local.corredor}, Seção ${local.secao}, Prateleira ${local.prateleira}`
+      return `Corredor ${local.corredor}, Prateleira ${local.prateleira}, Seção ${local.secao}`
     },
 
     descreverLocais(movimentacao: MovimentacaoHistorico): string {

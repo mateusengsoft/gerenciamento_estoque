@@ -21,10 +21,15 @@ const router = createRouter({
 
     { path: '/entradas', name: 'entradas', component: () => import('@/views/EntradaView.vue') },
 
-    { path: '/:caminho(.*)*', redirect: '/produtos' },
-
     { path: '/saidas', name: 'saidas', component: () => import('@/views/SaidaView.vue') },
-    {path: '/movimentacoes', name: 'movimentacoes', component: () => import('@/views/HistoricoView.vue')}
+
+    {
+      path: '/movimentacoes',
+      name: 'movimentacoes',
+      component: () => import('@/views/HistoricoView.vue'),
+    },
+
+    { path: '/:caminho(.*)*', redirect: '/produtos' },
   ],
 })
 
