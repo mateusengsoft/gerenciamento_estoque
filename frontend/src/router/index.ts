@@ -24,6 +24,7 @@ const router = createRouter({
     { path: '/:caminho(.*)*', redirect: '/produtos' },
 
     { path: '/saidas', name: 'saidas', component: () => import('@/views/SaidaView.vue') },
+    {path: '/movimentacoes', name: 'movimentacoes', component: () => import('@/views/HistoricoView.vue')}
   ],
 })
 
