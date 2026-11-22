@@ -24,6 +24,7 @@ export default defineComponent({
     <RouterLink to="/produtos">Produtos</RouterLink>
     <RouterLink to="/entradas">Entrada</RouterLink>
     <RouterLink to="/saidas">Saida</RouterLink>
+    <RouterLink to="/movimentacoes">Movimentacoes</RouterLink>
 
     <span class="espaco"></span>
     <span>{{ authStore.ehAdmin ? 'Administrador' : 'Operador' }}</span>
