@@ -94,6 +94,7 @@ export default defineComponent({
   <main>
     <header>
       <h1>Produtos</h1>
+      <RouterLink v-if="authStore.ehAdmin" to="/produtos/novo">Novo produto</RouterLink>
     </header>
 
     <form class="filtros" @submit.prevent="carregar">

@@ -38,6 +38,13 @@ const router = createRouter({
       component: () => import('@/views/EstoqueDetalheView.vue'),
     },
 
+    {
+      path: '/produtos/novo',
+      name: 'produto-novo',
+      component: () => import('@/views/ProdutoNovoView.vue'),
+      meta: { somenteAdmin: true },
+    },
+
     { path: '/:caminho(.*)*', redirect: '/produtos' },
   ],
 })
