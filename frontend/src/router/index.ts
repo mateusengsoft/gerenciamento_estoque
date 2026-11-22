@@ -29,6 +29,14 @@ const router = createRouter({
       component: () => import('@/views/HistoricoView.vue'),
     },
 
+    { path: '/estoque', name: 'estoque', component: () => import('@/views/EstoqueView.vue') },
+
+    {
+      path: '/estoque/:produtoId',
+      name: 'estoque-detalhe',
+      component: () => import('@/views/EstoqueDetalheView.vue'),
+    },
+
     { path: '/:caminho(.*)*', redirect: '/produtos' },
   ],
 })
