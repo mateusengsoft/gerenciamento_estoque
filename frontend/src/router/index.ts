@@ -4,6 +4,7 @@ import { useAuthStore } from '@/stores/auth'
 declare module 'vue-router' {
   interface RouteMeta {
     publica?: boolean
+    somenteAdmin?: boolean
   }
 }
 
@@ -47,6 +48,10 @@ router.beforeEach((destino) => {
   if (!destino.meta.publica && !auth.estaLogado) {
     auth.sair()
     return { name: 'login' }
+  }
+
+  if (destino.meta.somenteAdmin && !auth.ehAdmin) {
+    return { name: 'produtos' }
   }
 
   if (destino.name === 'login' && auth.estaLogado) {

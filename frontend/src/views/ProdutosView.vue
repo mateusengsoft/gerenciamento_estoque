@@ -18,6 +18,8 @@ export default defineComponent({
         nome: '',
         destaque: '',
         ativo: '',
+        precoMinimo: '',
+        precoMaximo: '',
       },
     }
   },
@@ -65,6 +67,12 @@ export default defineComponent({
       if (ativo) {
         parametros.set('ativo', ativo)
       }
+      if (this.filtros.precoMinimo !== '') {
+        parametros.set('precoMinimo', this.filtros.precoMinimo)
+      }
+      if (this.filtros.precoMaximo !== '') {
+        parametros.set('precoMaximo', this.filtros.precoMaximo)
+      }
 
       const texto = parametros.toString()
       return texto ? `/produtos?${texto}` : '/produtos'
@@ -74,6 +82,8 @@ export default defineComponent({
       this.filtros.ativo = ''
       this.filtros.destaque = ''
       this.filtros.nome = ''
+      this.filtros.precoMaximo = ''
+      this.filtros.precoMinimo = ''
       this.carregar()
     },
   },
@@ -99,6 +109,21 @@ export default defineComponent({
         <option value="true">Ativos</option>
         <option value="false">Inativos</option>
       </select>
+
+      <input
+        v-model="filtros.precoMinimo"
+        type="number"
+        min="0"
+        step="0.01"
+        placeholder="Preço mínimo"
+      />
+      <input
+        v-model="filtros.precoMaximo"
+        type="number"
+        min="0"
+        step="0.01"
+        placeholder="Preço máximo"
+      />
 
       <button type="submit">Filtrar</button>
       <button type="button" @click="limpar">Limpar</button>
