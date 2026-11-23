@@ -1,24 +1,24 @@
+
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import { Categoria } from './categoria.entity.js';
-import { Repository } from 'typeorm';
+import { CategoriasRepository } from './categorias.repository.js';
 import { PaginacaoDto } from '../common/dto/paginacao.dto.js';
 import type { Paginado } from '../common/interface/paginado.interface.js';
 
 @Injectable()
 export class CategoriasService {
   constructor(
-    @InjectRepository(Categoria)
-    private readonly categoriasRepository: Repository<Categoria>,
+    private readonly categoriasRepository: CategoriasRepository,
   ) {}
 
-  async listar(paginacao: PaginacaoDto): Promise<Paginado<Categoria>> {
+  async listar(
+    paginacao: PaginacaoDto,
+  ): Promise<Paginado<Categoria>> {
     const { pagina, limite } = paginacao;
-    const [categorias, total] = await this.categoriasRepository.findAndCount({
-      skip: (pagina - 1) * limite,
-      take: limite,
-      order: { nome: 'ASC' },
-    });
+
+    const [categorias, total] =
+      await this.categoriasRepository.listar(pagina, limite);
+
     return {
       dados: categorias,
       total,
@@ -28,12 +28,14 @@ export class CategoriasService {
   }
 
   async buscarPorId(id: number): Promise<Categoria> {
-    const categoria = await this.categoriasRepository.findOneBy({ id });
+    const categoria = await this.categoriasRepository.buscarPorId(id);
+
     if (!categoria) {
       throw new NotFoundException(
         `A categoria com o ID ${id} não foi encontrada.`,
       );
     }
+
     return categoria;
   }
 }
