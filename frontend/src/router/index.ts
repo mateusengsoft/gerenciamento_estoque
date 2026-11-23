@@ -59,6 +59,19 @@ const router = createRouter({
       meta: { publica: true },
     },
 
+    {
+      path: '/usuarios',
+      name: 'usuarios',
+      component: () => import('@/views/UsuariosView.vue'),
+      meta: { somenteAdmin: true },
+    },
+    {
+      path: '/usuarios/:id/editar',
+      name: 'usuario-editar',
+      component: () => import('@/views/UsuarioEditarView.vue'),
+      meta: { somenteAdmin: true },
+    },
+
     { path: '/:caminho(.*)*', redirect: '/produtos' },
   ],
 })
