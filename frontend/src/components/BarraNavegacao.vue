@@ -26,6 +26,7 @@ export default defineComponent({
     <RouterLink to="/saidas">Saída</RouterLink>
     <RouterLink to="/movimentacoes">Histórico</RouterLink>
     <RouterLink to="/estoque">Estoque</RouterLink>
+    <RouterLink v-if="authStore.ehAdmin" to="/usuarios">Usuários</RouterLink>
 
     <span class="espaco"></span>
     <span>{{ authStore.ehAdmin ? 'Administrador' : 'Operador' }}</span>

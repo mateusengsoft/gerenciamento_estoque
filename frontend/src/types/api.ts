@@ -136,3 +136,27 @@ export interface ProdutoDetalhe {
   perecivel: boolean
   ativo: boolean
 }
+
+export interface EnderecoUsuario {
+  id: number
+  logradouro: string
+  numero: string | null
+  complemento: string | null
+  cep: string
+  municipioId: number
+  bairroId: number | null
+  bairroNome: string | null
+}
+
+export interface ContatoUsuario {
+  id: number
+  codigoPais: string | null
+  ddd: string
+  numero: string
+}
+
+export interface UsuarioDetalhe extends UsuarioPublico {
+  cpf: string
+  enderecos: EnderecoUsuario[]
+  contatos: ContatoUsuario[]
+}
