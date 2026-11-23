@@ -18,6 +18,7 @@ import { Paginado } from '../common/interface/paginado.interface.js';
 import { ProdutoListagem } from './produto-listagem.interface.js';
 import { AtualizarProdutoDto } from './dto/atualizar-produto.dto.js';
 import { Local } from '../locais/local.entity.js';
+import { ProdutoDetalhe } from './produto-detalhe.interface.js';
 
 const SQL_ESTOQUE_BAIXO = 'ep.quantidade_total < p.estoque_minimo';
 
@@ -293,4 +294,25 @@ export class ProdutosService {
 
     return locais;
   }
+
+  async detalhar(id: number): Promise<ProdutoDetalhe> {
+  const produto = await this.produtosRepository.findOne({
+    where: { id },
+    select: {
+      id: true,
+      codigo: true,
+      nome: true,
+      descricao: true,
+      precoVendaAtual: true,
+      categoriaId: true,
+      estoqueMinimo: true,
+      perecivel: true,
+      ativo: true,
+    },
+  });
+  if (!produto) {
+    throw new NotFoundException('Produto não encontrado.');
+  }
+  return produto;
+}
 }

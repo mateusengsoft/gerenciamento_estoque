@@ -61,4 +61,10 @@ export class ProdutosController {
   listarLocais(@Param('id', ParseIntPipe) id: number) {
     return this.produtosService.listarLocais(id);
   }
+
+  @Get(':id')
+@UseGuards(JwtAuthGuard, PerfisGuard)
+detalhar(@Param('id', ParseIntPipe) id: number) {
+  return this.produtosService.detalhar(id);
+}
 }
