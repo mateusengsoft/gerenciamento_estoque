@@ -95,7 +95,6 @@ export default defineComponent({
     <header>
       <h1>Produtos</h1>
       <RouterLink v-if="authStore.ehAdmin" to="/produtos/novo">Novo produto</RouterLink>
-
     </header>
 
     <form class="filtros" @submit.prevent="carregar">
@@ -167,8 +166,10 @@ export default defineComponent({
             <span v-if="produto.proximoDoVencimento" class="etiqueta">Vencendo </span>
           </td>
           <td>
-  <RouterLink v-if="authStore.ehAdmin" :to="`/produtos/${produto.id}/editar`">Editar</RouterLink>
-        </td>
+            <RouterLink v-if="authStore.ehAdmin" :to="`/produtos/${produto.id}/editar`"
+              >Editar</RouterLink
+            >
+          </td>
         </tr>
       </tbody>
     </table>

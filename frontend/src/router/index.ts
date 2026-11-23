@@ -46,11 +46,18 @@ const router = createRouter({
     },
 
     {
-  path: '/produtos/:id/editar',
-  name: 'produto-editar',
-  component: () => import('@/views/ProdutoEditarView.vue'),
-  meta: { somenteAdmin: true },
-},
+      path: '/produtos/:id/editar',
+      name: 'produto-editar',
+      component: () => import('@/views/ProdutoEditarView.vue'),
+      meta: { somenteAdmin: true },
+    },
+
+    {
+      path: '/cadastro',
+      name: 'cadastro',
+      component: () => import('@/views/CadastroView.vue'),
+      meta: { publica: true },
+    },
 
     { path: '/:caminho(.*)*', redirect: '/produtos' },
   ],

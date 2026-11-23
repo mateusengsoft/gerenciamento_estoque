@@ -74,6 +74,7 @@ export default defineComponent({
         {{ carregando ? 'Entrando...' : 'Entrar' }}
       </button>
     </form>
+    <p>Ainda não tem acesso? <RouterLink to="/cadastro">Criar conta</RouterLink></p>
   </main>
 </template>
 
