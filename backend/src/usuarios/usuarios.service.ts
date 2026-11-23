@@ -4,42 +4,26 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Usuario } from './usuario.entity.js';
-import { DataSource, In, Not, QueryFailedError, Repository } from 'typeorm';
-import { CriarUsuarioDto } from './dto/criar-usuario.dto.js';
-import { cpfValido } from '../common/validators/cpf.js';
 import bcrypt from 'bcrypt';
-import { TipoUsuario } from './tipo-usuario.enum.js';
-import { Endereco } from '../enderecos/endereco.entity.js';
-import { Contato } from '../contatos/contato.entity.js';
-import { UsuarioContato } from './usuario-contato.entity.js';
-import { UsuarioEndereco } from './usuario-endereco.entity.js';
-import type { UsuarioPublico } from './usuario-publico.interface.js';
-import { PaginacaoDto } from '../common/dto/paginacao.dto.js';
-import type { Paginado } from '../common/interface/paginado.interface.js';
+import { Usuario } from './usuario.entity.js';
+import { CriarUsuarioDto } from './dto/criar-usuario.dto.js';
 import { AtualizarAtivacaoDto } from './dto/atualizar-ativacao.dto.js';
 import { AtualizarUsuarioDto } from './dto/atualizar-usuario.dto.js';
+import { cpfValido } from '../common/validators/cpf.js';
+import { PaginacaoDto } from '../common/dto/paginacao.dto.js';
+import type { Paginado } from '../common/interface/paginado.interface.js';
+import type { UsuarioPublico } from './usuario-publico.interface.js';
+import { UsuariosRepository } from './usuarios.repository.js';
+import {
+  BairroMunicipioInvalidoError,
+  EmailDuplicadoError,
+  MunicipioInexistenteError,
+  RegistroDuplicadoError,
+} from './usuarios.errors.js';
 
 @Injectable()
 export class UsuariosService {
-  constructor(
-    @InjectRepository(Usuario)
-    private readonly usuariosRepository: Repository<Usuario>,
-    private readonly dataSource: DataSource,
-
-    @InjectRepository(Contato)
-    private readonly contatosRepository: Repository<Contato>,
-
-    @InjectRepository(UsuarioContato)
-    private readonly usuariosContatosRepository: Repository<UsuarioContato>,
-
-    @InjectRepository(Endereco)
-    private readonly enderecosRepository: Repository<Endereco>,
-
-    @InjectRepository(UsuarioEndereco)
-    private readonly usuariosEnderecosRepository: Repository<UsuarioEndereco>,
-  ) {}
+  constructor(private readonly usuariosRepository: UsuariosRepository) {}
 
   async autoCadastrar(dto: CriarUsuarioDto): Promise<UsuarioPublico> {
     if (!cpfValido(dto.cpf)) {
@@ -55,177 +39,59 @@ export class UsuariosService {
       );
     }
 
-    const loginMinusculas = dto.login.toLowerCase();
-    const emailMinusculas = dto.email.toLowerCase();
     const senhaHash = await bcrypt.hash(dto.senha, 10);
+
     try {
-      return await this.dataSource.transaction(async (manager) => {
-        if (dto.endereco.bairroId) {
-          const [bairro]: { municipio_id: number }[] = await manager.query(
-            'select municipio_id from bairros where id = $1',
-            [dto.endereco.bairroId],
-          );
-
-          if (!bairro || bairro.municipio_id !== dto.endereco.municipioId) {
-            throw new BadRequestException(
-              'O bairro não pertence ao município informado.',
-            );
-          }
-        }
-
-        const usuario = await manager.save(Usuario, {
-          login: loginMinusculas,
-          senhaHash: senhaHash,
-          nome: dto.nome,
-          email: emailMinusculas,
-          cpf: dto.cpf,
-          tipo: TipoUsuario.OPERADOR_ESTOQUE,
-          ativo: false,
-        });
-
-        const endereco = await manager.save(Endereco, {
-          ...dto.endereco,
-          usuarioId: usuario.id,
-        });
-
-        const contato = await manager.save(Contato, {
-          ...dto.contato,
-          usuarioId: usuario.id,
-        });
-
-        await manager.save(UsuarioContato, {
-          usuarioId: usuario.id,
-          contatoId: contato.id,
-        });
-
-        await manager.save(UsuarioEndereco, {
-          usuarioId: usuario.id,
-          enderecoId: endereco.id,
-        });
-
-        return {
-          id: usuario.id,
-          login: usuario.login,
-          nome: usuario.nome,
-          email: usuario.email,
-          tipo: usuario.tipo,
-          ativo: usuario.ativo,
-        };
+      return await this.usuariosRepository.cadastrar({
+        login: dto.login.toLowerCase(),
+        senhaHash,
+        nome: dto.nome,
+        email: dto.email.toLowerCase(),
+        cpf: dto.cpf,
+        contato: dto.contato,
+        endereco: dto.endereco,
       });
     } catch (erro) {
-      if (
-        erro instanceof QueryFailedError &&
-        (erro.driverError as { code?: string }).code === '23505'
-      ) {
-        throw new ConflictException('Login, e-mail ou CPF já cadastrado.');
+      if (erro instanceof RegistroDuplicadoError) {
+        throw new ConflictException(erro.message);
       }
       if (
-        erro instanceof QueryFailedError &&
-        (erro.driverError as { code?: string }).code === '23503'
+        erro instanceof BairroMunicipioInvalidoError ||
+        erro instanceof MunicipioInexistenteError
       ) {
-        throw new BadRequestException('Município informado não existe.');
+        throw new BadRequestException(erro.message);
       }
-
       throw erro;
     }
   }
 
   async buscarPorLoginComSenha(login: string): Promise<Usuario | null> {
-    const loginNormalizado = login.toLowerCase();
-    const usuario = await this.usuariosRepository.findOne({
-      where: { login: loginNormalizado },
-      select: { id: true, senhaHash: true, tipo: true, ativo: true },
-    });
-
-    return usuario;
+    return this.usuariosRepository.buscarPorLoginComSenha(login.toLowerCase());
   }
 
   async buscarPorId(id: number): Promise<Usuario | null> {
-    const usuario = await this.usuariosRepository.findOne({
-      where: { id },
-      select: { id: true, tipo: true, ativo: true },
-    });
-
-    return usuario;
+    return this.usuariosRepository.buscarPorId(id);
   }
 
   async listar(paginacao: PaginacaoDto): Promise<Paginado<UsuarioPublico>> {
     const { pagina, limite } = paginacao;
-    const [usuarios, total] = await this.usuariosRepository.findAndCount({
-      where: { login: Not('sistema') },
-      skip: (pagina - 1) * limite,
-      take: limite,
-      order: { nome: 'ASC' },
-      select: {
-        id: true,
-        nome: true,
-        login: true,
-        email: true,
-        tipo: true,
-        ativo: true,
-      },
-    });
-    return {
-      dados: usuarios,
-      total,
+    const [usuarios, total] = await this.usuariosRepository.listar(
       pagina,
       limite,
-    };
+    );
+    return { dados: usuarios, total, pagina, limite };
   }
 
   async detalhar(id: number) {
-    const usuario = await this.usuariosRepository.findOne({
-      where: { id },
-      select: {
-        id: true,
-        nome: true,
-        login: true,
-        email: true,
-        tipo: true,
-        ativo: true,
-        cpf: true,
-      },
-    });
+    const usuario = await this.usuariosRepository.buscarComCpf(id);
     if (!usuario || usuario.login === 'sistema') {
       throw new NotFoundException('Usuário não encontrado.');
     }
 
-    const associacoesEnderecos = await this.usuariosEnderecosRepository.find({
-      where: { usuarioId: id },
-      select: { usuarioId: true, enderecoId: true },
-    });
-
-    const idsEnderecos = associacoesEnderecos.map((a) => a.enderecoId);
-    const enderecos =
-      idsEnderecos.length > 0
-        ? await this.enderecosRepository.find({
-            where: { id: In(idsEnderecos) },
-            select: {
-              id: true,
-              logradouro: true,
-              numero: true,
-              complemento: true,
-              cep: true,
-              municipioId: true,
-              bairroId: true,
-              bairroNome: true,
-            },
-          })
-        : [];
-
-    const associacoesContatos = await this.usuariosContatosRepository.find({
-      where: { usuarioId: id },
-      select: { usuarioId: true, contatoId: true },
-    });
-
-    const idsContatos = associacoesContatos.map((a) => a.contatoId);
-    const contatos =
-      idsContatos.length > 0
-        ? await this.contatosRepository.find({
-            where: { id: In(idsContatos) },
-            select: { id: true, codigoPais: true, ddd: true, numero: true },
-          })
-        : [];
+    const [enderecos, contatos] = await Promise.all([
+      this.usuariosRepository.listarEnderecos(id),
+      this.usuariosRepository.listarContatos(id),
+    ]);
 
     return { ...usuario, enderecos, contatos };
   }
@@ -234,33 +100,14 @@ export class UsuariosService {
     id: number,
     dto: AtualizarAtivacaoDto,
   ): Promise<UsuarioPublico> {
-    const existente = await this.usuariosRepository.findOne({
-      where: { id },
-      select: { id: true, login: true },
-    });
+    await this.garantirQueExiste(id);
 
-    if (!existente || existente.login === 'sistema') {
-      throw new NotFoundException('Usuário não encontrado.');
-    }
-
-    await this.usuariosRepository.update(id, {
+    await this.usuariosRepository.atualizar(id, {
       ativo: dto.ativo,
       tipo: dto.tipo,
     });
 
-    const atualizado = await this.usuariosRepository.findOneOrFail({
-      where: { id },
-      select: {
-        id: true,
-        login: true,
-        nome: true,
-        email: true,
-        tipo: true,
-        ativo: true,
-      },
-    });
-
-    return atualizado;
+    return this.usuariosRepository.buscarPublico(id);
   }
 
   async atualizar(
@@ -273,40 +120,27 @@ export class UsuariosService {
       );
     }
 
-    const existente = await this.usuariosRepository.findOne({
-      where: { id },
-      select: { id: true, login: true },
-    });
-
-    if (!existente || existente.login === 'sistema') {
-      throw new NotFoundException('Usuário não encontrado.');
-    }
+    await this.garantirQueExiste(id);
 
     try {
-      await this.usuariosRepository.update(id, {
+      await this.usuariosRepository.atualizar(id, {
         nome: dto.nome,
         email: dto.email?.toLowerCase(),
       });
     } catch (erro) {
-      if (
-        erro instanceof QueryFailedError &&
-        (erro.driverError as { code?: string }).code === '23505'
-      ) {
-        throw new ConflictException('E-mail já cadastrado para outro usuário.');
+      if (erro instanceof EmailDuplicadoError) {
+        throw new ConflictException(erro.message);
       }
       throw erro;
     }
 
-    return await this.usuariosRepository.findOneOrFail({
-      where: { id },
-      select: {
-        id: true,
-        login: true,
-        nome: true,
-        email: true,
-        tipo: true,
-        ativo: true,
-      },
-    });
+    return this.usuariosRepository.buscarPublico(id);
+  }
+
+  private async garantirQueExiste(id: number): Promise<void> {
+    const existente = await this.usuariosRepository.buscarLogin(id);
+    if (!existente || existente.login === 'sistema') {
+      throw new NotFoundException('Usuário não encontrado.');
+    }
   }
 }

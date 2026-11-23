@@ -7,6 +7,7 @@ import { Contato } from '../contatos/contato.entity.js';
 import { UsuarioEndereco } from './usuario-endereco.entity.js';
 import { UsuarioContato } from './usuario-contato.entity.js';
 import { UsuariosController } from './usuarios.controller.js';
+import { UsuariosRepository } from './usuarios.repository.js';
 
 @Module({
   imports: [
@@ -18,7 +19,7 @@ import { UsuariosController } from './usuarios.controller.js';
       UsuarioContato,
     ]),
   ],
-  providers: [UsuariosService],
+  providers: [UsuariosService, UsuariosRepository],
   exports: [UsuariosService],
   controllers: [UsuariosController],
 })
