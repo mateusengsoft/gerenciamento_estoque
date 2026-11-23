@@ -13,6 +13,7 @@ import { MovimentacoesController } from './movimentacoes.controller.js';
 import { MovimentacoesService } from './movimentacoes.service.js';
 import { EstoqueService } from './estoque.service.js';
 import { EstoqueController } from './estoque.controller.js';
+import { EstoqueRepository } from './estoque.repository.js';
 
 @Module({
   imports: [
@@ -29,6 +30,6 @@ import { EstoqueController } from './estoque.controller.js';
     AuthModule,
   ],
   controllers: [MovimentacoesController, EstoqueController],
-  providers: [MovimentacoesService, EstoqueService],
+  providers: [MovimentacoesService, EstoqueService, EstoqueRepository],
 })
 export class MovimentacoesModule {}
