@@ -1,4 +1,3 @@
-
 import {
   BadRequestException,
   ConflictException,
@@ -26,54 +25,50 @@ export class FornecedoresService {
   ) {}
 
   async cadastrar(
-  dto: CriarFornecedorDto,
-  usuarioId: number,
-): Promise<FornecedorPublico> {
-  if (!cnpjValido(dto.cnpj)) {
-    throw new BadRequestException('CNPJ inválido.');
-  }
-
-  if (
-    (dto.endereco.bairroId && dto.endereco.bairroNome) ||
-    (!dto.endereco.bairroId && !dto.endereco.bairroNome)
-  ) {
-    throw new BadRequestException(
-      'Informe o bairro da lista ou digite o nome (apenas um dos dois).',
-    );
-  }
-
-  const email = dto.email.toLowerCase();
-
-  try {
-    return await this.fornecedoresRepository.cadastrar(
-      dto,
-      usuarioId,
-      email,
-    );
-  } catch (erro) {
-    if (erro instanceof BairroMunicipioInvalidoError) {
-      throw new BadRequestException(erro.message);
+    dto: CriarFornecedorDto,
+    usuarioId: number,
+  ): Promise<FornecedorPublico> {
+    if (!cnpjValido(dto.cnpj)) {
+      throw new BadRequestException('CNPJ inválido.');
     }
 
-    if (erro instanceof RegistroDuplicadoError) {
-      throw new ConflictException(erro.message);
+    if (
+      (dto.endereco.bairroId && dto.endereco.bairroNome) ||
+      (!dto.endereco.bairroId && !dto.endereco.bairroNome)
+    ) {
+      throw new BadRequestException(
+        'Informe o bairro da lista ou digite o nome (apenas um dos dois).',
+      );
     }
 
-    if (erro instanceof RelacionamentoInexistenteError) {
-      throw new BadRequestException(erro.message);
-    }
+    const email = dto.email.toLowerCase();
 
-    throw erro;
+    try {
+      return await this.fornecedoresRepository.cadastrar(dto, usuarioId, email);
+    } catch (erro) {
+      if (erro instanceof BairroMunicipioInvalidoError) {
+        throw new BadRequestException(erro.message);
+      }
+
+      if (erro instanceof RegistroDuplicadoError) {
+        throw new ConflictException(erro.message);
+      }
+
+      if (erro instanceof RelacionamentoInexistenteError) {
+        throw new BadRequestException(erro.message);
+      }
+
+      throw erro;
+    }
   }
-}
 
-  async listar(
-    paginacao: PaginacaoDto,
-  ): Promise<Paginado<FornecedorPublico>> {
+  async listar(paginacao: PaginacaoDto): Promise<Paginado<FornecedorPublico>> {
     const { pagina, limite } = paginacao;
 
-    const [fornecedores, total] =
-      await this.fornecedoresRepository.listar(pagina, limite);
+    const [fornecedores, total] = await this.fornecedoresRepository.listar(
+      pagina,
+      limite,
+    );
 
     return {
       dados: fornecedores,

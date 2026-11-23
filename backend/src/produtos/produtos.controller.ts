@@ -63,8 +63,8 @@ export class ProdutosController {
   }
 
   @Get(':id')
-@UseGuards(JwtAuthGuard, PerfisGuard)
-detalhar(@Param('id', ParseIntPipe) id: number) {
-  return this.produtosService.detalhar(id);
-}
+  @UseGuards(JwtAuthGuard, PerfisGuard)
+  detalhar(@Param('id', ParseIntPipe) id: number) {
+    return this.produtosService.detalhar(id);
+  }
 }

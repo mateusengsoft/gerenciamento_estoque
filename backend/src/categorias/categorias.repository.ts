@@ -1,4 +1,3 @@
-
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Categoria } from './categoria.entity.js';
@@ -11,10 +10,7 @@ export class CategoriasRepository {
     private readonly repository: Repository<Categoria>,
   ) {}
 
-  async listar(
-    pagina: number,
-    limite: number,
-  ): Promise<[Categoria[], number]> {
+  async listar(pagina: number, limite: number): Promise<[Categoria[], number]> {
     return this.repository.findAndCount({
       skip: (pagina - 1) * limite,
       take: limite,

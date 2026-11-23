@@ -9,7 +9,6 @@ import { FornecedoresController } from './fornecedores.controller.js';
 import { Fornecedor } from './fornecedor.entity.js';
 import { FornecedoresRepository } from './fornecedores.repository.js';
 
-
 @Module({
   imports: [
     TypeOrmModule.forFeature([
@@ -21,7 +20,6 @@ import { FornecedoresRepository } from './fornecedores.repository.js';
     AuthModule,
   ],
   controllers: [FornecedoresController],
-  providers: [FornecedoresService,FornecedoresRepository],
+  providers: [FornecedoresService, FornecedoresRepository],
 })
 export class FornecedoresModule {}
-

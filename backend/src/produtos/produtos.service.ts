@@ -296,23 +296,23 @@ export class ProdutosService {
   }
 
   async detalhar(id: number): Promise<ProdutoDetalhe> {
-  const produto = await this.produtosRepository.findOne({
-    where: { id },
-    select: {
-      id: true,
-      codigo: true,
-      nome: true,
-      descricao: true,
-      precoVendaAtual: true,
-      categoriaId: true,
-      estoqueMinimo: true,
-      perecivel: true,
-      ativo: true,
-    },
-  });
-  if (!produto) {
-    throw new NotFoundException('Produto não encontrado.');
+    const produto = await this.produtosRepository.findOne({
+      where: { id },
+      select: {
+        id: true,
+        codigo: true,
+        nome: true,
+        descricao: true,
+        precoVendaAtual: true,
+        categoriaId: true,
+        estoqueMinimo: true,
+        perecivel: true,
+        ativo: true,
+      },
+    });
+    if (!produto) {
+      throw new NotFoundException('Produto não encontrado.');
+    }
+    return produto;
   }
-  return produto;
-}
 }
