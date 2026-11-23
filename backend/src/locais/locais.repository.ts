@@ -4,7 +4,7 @@ import { Local } from './local.entity.js';
 import { Repository } from 'typeorm';
 
 @Injectable()
-export class CategoriasRepository {
+export class LocaisRepository {
   constructor(
     @InjectRepository(Local)
     private readonly repository: Repository<Local>,

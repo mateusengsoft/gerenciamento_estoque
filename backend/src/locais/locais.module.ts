@@ -4,10 +4,11 @@ import { Local } from './local.entity.js';
 import { AuthModule } from '../auth/auth.module.js';
 import { LocaisController } from './locais.controller.js';
 import { LocaisService } from './locais.service.js';
+import { LocaisRepository } from './locais.repository.js';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Local]), AuthModule],
   controllers: [LocaisController],
-  providers: [LocaisService],
+  providers: [LocaisService, LocaisRepository],
 })
 export class LocaisModule {}
