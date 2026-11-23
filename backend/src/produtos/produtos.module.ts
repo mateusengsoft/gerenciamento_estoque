@@ -8,6 +8,8 @@ import { AuthModule } from '../auth/auth.module.js';
 import { ProdutosController } from './produtos.controller.js';
 import { ProdutosService } from './produtos.service.js';
 import { Local } from '../locais/local.entity.js';
+import { Categoria } from '../categorias/categoria.entity.js';
+import { ProdutosRepository } from './produtos.repository.js';
 
 @Module({
   imports: [
@@ -17,10 +19,11 @@ import { Local } from '../locais/local.entity.js';
       EstoqueProduto,
       LocalProduto,
       Local,
+      Categoria,
     ]),
     AuthModule,
   ],
   controllers: [ProdutosController],
-  providers: [ProdutosService],
+  providers: [ProdutosService, ProdutosRepository],
 })
 export class ProdutosModule {}
