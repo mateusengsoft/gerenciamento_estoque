@@ -38,7 +38,7 @@ export class CriarProdutoDto {
   descricao?: string;
 
   @IsNumber({ maxDecimalPlaces: 2 })
-  @Min(0)
+  @IsPositive()
   precoVendaAtual: number;
 
   @IsInt()
