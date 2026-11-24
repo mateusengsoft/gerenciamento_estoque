@@ -26,6 +26,17 @@ export interface NovoUsuario {
   contato: CriarContatoDto;
   endereco: CriarEnderecoDto;
 }
+export interface EnderecoDoUsuario {
+  id: number;
+  logradouro: string;
+  numero: string | null;
+  complemento: string | null;
+  cep: string;
+  municipioId: number;
+  estadoId: number;
+  bairroId: number | null;
+  bairroNome: string | null;
+}
 
 const CAMPOS_PUBLICOS = {
   id: true,
@@ -168,28 +179,24 @@ export class UsuariosRepository {
     });
   }
 
-  async listarEnderecos(usuarioId: number): Promise<Endereco[]> {
-    const associacoes = await this.usuariosEnderecosRepository.find({
-      where: { usuarioId },
-      select: { usuarioId: true, enderecoId: true },
-    });
-    const ids = associacoes.map((a) => a.enderecoId);
-    if (ids.length === 0) {
-      return [];
-    }
-    return this.enderecosRepository.find({
-      where: { id: In(ids) },
-      select: {
-        id: true,
-        logradouro: true,
-        numero: true,
-        complemento: true,
-        cep: true,
-        municipioId: true,
-        bairroId: true,
-        bairroNome: true,
-      },
-    });
+  async listarEnderecos(usuarioId: number): Promise<EnderecoDoUsuario[]> {
+    return this.dataSource.query(
+      `select e.id,
+              e.logradouro,
+              e.numero,
+              e.complemento,
+              e.cep,
+              e.municipio_id as "municipioId",
+              m.estado_id as "estadoId",
+              e.bairro_id as "bairroId",
+              e.bairro_nome as "bairroNome"
+       from usuarios_enderecos ue
+       join enderecos e on e.id = ue.endereco_id
+       join municipios m on m.id = e.municipio_id
+       where ue.usuario_id = $1
+       order by e.id`,
+      [usuarioId],
+    );
   }
 
   async listarContatos(usuarioId: number): Promise<Contato[]> {
@@ -219,6 +226,73 @@ export class UsuariosRepository {
         (erro.driverError as { code?: string }).code === '23505'
       ) {
         throw new EmailDuplicadoError();
+      }
+      throw erro;
+    }
+  }
+
+  async atualizarContato(
+    usuarioId: number,
+    dados: CriarContatoDto,
+  ): Promise<boolean> {
+    const associacao = await this.usuariosContatosRepository.findOne({
+      where: { usuarioId },
+      select: { usuarioId: true, contatoId: true },
+      order: { contatoId: 'ASC' },
+    });
+    if (!associacao) {
+      return false;
+    }
+    await this.contatosRepository.update(associacao.contatoId, {
+      codigoPais: dados.codigoPais,
+      ddd: dados.ddd,
+      numero: dados.numero,
+    });
+    return true;
+  }
+
+  async atualizarEndereco(
+    usuarioId: number,
+    dados: CriarEnderecoDto,
+  ): Promise<boolean> {
+    try {
+      return await this.dataSource.transaction(async (manager) => {
+        const associacao = await manager.findOne(UsuarioEndereco, {
+          where: { usuarioId },
+          select: { usuarioId: true, enderecoId: true },
+          order: { enderecoId: 'ASC' },
+        });
+        if (!associacao) {
+          return false;
+        }
+
+        if (dados.bairroId) {
+          const [bairro]: { municipio_id: number }[] = await manager.query(
+            'select municipio_id from bairros where id = $1',
+            [dados.bairroId],
+          );
+          if (!bairro || bairro.municipio_id !== dados.municipioId) {
+            throw new BairroMunicipioInvalidoError();
+          }
+        }
+
+        await manager.update(Endereco, associacao.enderecoId, {
+          logradouro: dados.logradouro,
+          numero: dados.numero ?? null,
+          complemento: dados.complemento ?? null,
+          cep: dados.cep,
+          municipioId: dados.municipioId,
+          bairroId: dados.bairroId ?? null,
+          bairroNome: dados.bairroNome ?? null,
+        });
+        return true;
+      });
+    } catch (erro) {
+      if (
+        erro instanceof QueryFailedError &&
+        (erro.driverError as { code?: string }).code === '23503'
+      ) {
+        throw new MunicipioInexistenteError();
       }
       throw erro;
     }

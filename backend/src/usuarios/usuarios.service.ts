@@ -20,6 +20,8 @@ import {
   MunicipioInexistenteError,
   RegistroDuplicadoError,
 } from './usuarios.errors.js';
+import { CriarEnderecoDto } from '../enderecos/dto/criar-endereco.dto.js';
+import { CriarContatoDto } from '../contatos/dto/criar-contato.dto.js';
 
 @Injectable()
 export class UsuariosService {
@@ -30,14 +32,7 @@ export class UsuariosService {
       throw new BadRequestException('CPF inválido.');
     }
 
-    if (
-      (dto.endereco.bairroId && dto.endereco.bairroNome) ||
-      (!dto.endereco.bairroId && !dto.endereco.bairroNome)
-    ) {
-      throw new BadRequestException(
-        'Informe o bairro da lista ou digite o nome (apenas um dos dois).',
-      );
-    }
+    this.validarBairro(dto.endereco);
 
     const senhaHash = await bcrypt.hash(dto.senha, 10);
 
@@ -141,6 +136,52 @@ export class UsuariosService {
     const existente = await this.usuariosRepository.buscarLogin(id);
     if (!existente || existente.login === 'sistema') {
       throw new NotFoundException('Usuário não encontrado.');
+    }
+  }
+  async atualizarContato(id: number, dto: CriarContatoDto) {
+    await this.garantirQueExiste(id);
+
+    const atualizou = await this.usuariosRepository.atualizarContato(id, dto);
+    if (!atualizou) {
+      throw new NotFoundException('Este usuário não tem contato cadastrado.');
+    }
+    return this.usuariosRepository.listarContatos(id);
+  }
+
+  async atualizarEndereco(id: number, dto: CriarEnderecoDto) {
+    this.validarBairro(dto);
+    await this.garantirQueExiste(id);
+
+    try {
+      const atualizou = await this.usuariosRepository.atualizarEndereco(
+        id,
+        dto,
+      );
+      if (!atualizou) {
+        throw new NotFoundException(
+          'Este usuário não tem endereço cadastrado.',
+        );
+      }
+    } catch (erro) {
+      if (
+        erro instanceof BairroMunicipioInvalidoError ||
+        erro instanceof MunicipioInexistenteError
+      ) {
+        throw new BadRequestException(erro.message);
+      }
+      throw erro;
+    }
+    return this.usuariosRepository.listarEnderecos(id);
+  }
+
+  private validarBairro(endereco: CriarEnderecoDto): void {
+    if (
+      (endereco.bairroId && endereco.bairroNome) ||
+      (!endereco.bairroId && !endereco.bairroNome)
+    ) {
+      throw new BadRequestException(
+        'Informe o bairro da lista ou digite o nome (apenas um dos dois).',
+      );
     }
   }
 }

@@ -18,6 +18,8 @@ import { Perfis } from '../auth/perfis.decorator.js';
 import { TipoUsuario } from './tipo-usuario.enum.js';
 import { AtualizarAtivacaoDto } from './dto/atualizar-ativacao.dto.js';
 import { AtualizarUsuarioDto } from './dto/atualizar-usuario.dto.js';
+import { CriarContatoDto } from '../contatos/dto/criar-contato.dto.js';
+import { CriarEnderecoDto } from '../enderecos/dto/criar-endereco.dto.js';
 
 @Controller('usuarios')
 export class UsuariosController {
@@ -50,6 +52,26 @@ export class UsuariosController {
     @Body() dto: AtualizarAtivacaoDto,
   ) {
     return this.usuariosService.atualizarAtivacao(id, dto);
+  }
+
+  @Patch(':id/contato')
+  @UseGuards(JwtAuthGuard, PerfisGuard)
+  @Perfis(TipoUsuario.ADMINISTRADOR)
+  atualizarContato(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: CriarContatoDto,
+  ) {
+    return this.usuariosService.atualizarContato(id, dto);
+  }
+
+  @Patch(':id/endereco')
+  @UseGuards(JwtAuthGuard, PerfisGuard)
+  @Perfis(TipoUsuario.ADMINISTRADOR)
+  atualizarEndereco(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: CriarEnderecoDto,
+  ) {
+    return this.usuariosService.atualizarEndereco(id, dto);
   }
 
   @Patch(':id')
