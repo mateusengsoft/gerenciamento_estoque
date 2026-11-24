@@ -1,48 +1,42 @@
-# frontend
+# Frontend: telas do Gerenciamento de Estoque
 
-This template should help get you started developing with Vue 3 in Vite.
+Interface em **Vue 3** com **Options API**, **Vue Router**, **Pinia** e **Vite**.
 
-## Recommended IDE Setup
+> O passo a passo completo para rodar o projeto (banco, backend e frontend), as telas e as decisões estão no [README principal](../README.md).
 
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+## Como rodar
 
-## Recommended Browser Setup
+O backend precisa estar rodando antes.
 
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd)
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
-
-## Type Support for `.vue` Imports in TS
-
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
-
-## Customize configuration
-
-See [Vite Configuration Reference](https://vite.dev/config/).
-
-## Project Setup
-
-```sh
+```bash
+cp .env.example .env   # VITE_API_URL=http://localhost:3000
 pnpm install
+pnpm dev               # abre em http://localhost:5173
 ```
 
-### Compile and Hot-Reload for Development
+## Scripts
 
-```sh
-pnpm dev
-```
+| Comando | O que faz |
+|---|---|
+| `pnpm dev` | Sobe o frontend em modo de desenvolvimento |
+| `pnpm build` | Checa os tipos (vue-tsc) e gera a versão de produção em `dist/` |
+| `pnpm preview` | Serve localmente a versão gerada pelo `build` |
+| `pnpm lint` | Roda o oxlint e o ESLint |
+| `pnpm format` | Formata o código com o Prettier |
 
-### Type-Check, Compile and Minify for Production
+## Organização
 
-```sh
-pnpm build
-```
+| Pasta | Conteúdo |
+|---|---|
+| `src/views` | Uma tela por arquivo |
+| `src/components` | Barra de navegação, paginação e campo de moeda |
+| `src/router` | Rotas e o navigation guard (login obrigatório e rotas só de administrador) |
+| `src/stores` | Store do Pinia com o token e o perfil do usuário |
+| `src/services` | Cliente da API: monta as requisições e transforma os erros em mensagens |
+| `src/types` | Tipos das respostas da API |
+| `src/utils` | Formatação de preço, quantidade e data |
+| `src/assets` | CSS global |
 
-### Lint with [ESLint](https://eslint.org/)
+## Editor recomendado
 
-```sh
-pnpm lint
-```
+VS Code com a extensão **Vue - Official**. Desative a extensão Vetur, que é do Vue 2 e acusa erros falsos nos arquivos `.vue`.
