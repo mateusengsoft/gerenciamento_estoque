@@ -147,6 +147,7 @@ export interface EnderecoUsuario {
   municipioId: number
   bairroId: number | null
   bairroNome: string | null
+  estadoId: number
 }
 
 export interface ContatoUsuario {
