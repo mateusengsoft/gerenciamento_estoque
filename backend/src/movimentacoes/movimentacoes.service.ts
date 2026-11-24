@@ -117,18 +117,24 @@ export class MovimentacoesService {
     return { dados, total, pagina, limite };
   }
 
-  // Converte a data do pedido para o horário local e recusa o futuro.
-  private validarData(valor: string): Date {
+  
+   private validarData(valor: string): Date {
     const data = paraDataLocal(valor);
-    if (data > new Date()) {
+    const agora = new Date();
+    if (data > agora) {
       throw new BadRequestException(
         'A data da movimentação não pode estar no futuro.',
       );
     }
+
+    const soData = /^\d{4}-\d{2}-\d{2}$/.test(valor);
+    if (soData && data.toDateString() === agora.toDateString()) {
+      return agora;
+    }
     return data;
   }
 
-  // Erro de domínio → resposta HTTP. O "never" diz ao TypeScript que este método sempre lança.
+  
   private traduzirErro(erro: unknown): never {
     if (erro instanceof SaldoInsuficienteError) {
       throw new UnprocessableEntityException(erro.message);
