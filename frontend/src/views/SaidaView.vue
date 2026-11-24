@@ -10,10 +10,13 @@ import type {
   PosicaoEstoque,
   ProdutoListagem,
 } from '@/types/api'
+import CampoMoeda from '@/components/CampoMoeda.vue'
 import { formatarData, formatarQuantidade, hojeLocal } from '@/utils/formatar'
 
 export default defineComponent({
   name: 'SaidaView',
+
+  components: { CampoMoeda },
 
   data() {
     return {
@@ -196,7 +199,7 @@ export default defineComponent({
 
       <label v-if="formulario.motivo === 'VENDA'">
         Valor unitário
-        <input v-model.number="formulario.valorUnitario" type="number" min="0" step="0.01" />
+        <CampoMoeda v-model="formulario.valorUnitario" />
       </label>
       <label>
         Quantidade

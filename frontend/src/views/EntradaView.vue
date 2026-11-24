@@ -3,11 +3,14 @@ import { defineComponent } from 'vue'
 import { mapStores } from 'pinia'
 import { useAuthStore } from '@/stores/auth'
 import { requisitar, ErroApi } from '@/services/api'
+import CampoMoeda from '@/components/CampoMoeda.vue'
 import type { FornecedorPublico, Local, Lote, Paginado, ProdutoListagem } from '@/types/api'
 import { formatarData, hojeLocal } from '@/utils/formatar'
 
 export default defineComponent({
   name: 'EntradaView',
+
+  components: { CampoMoeda },
 
   data() {
     return {
@@ -245,13 +248,7 @@ export default defineComponent({
 
       <label for="valorUnitario">
         Valor Unitário
-        <input
-          v-model.number="formulario.valorUnitario"
-          type="number"
-          min="0"
-          step="0.01"
-          id="valorUnitario"
-        />
+        <CampoMoeda v-model="formulario.valorUnitario" id="valorUnitario" />
       </label>
 
       <label for="dataMovimentacao">

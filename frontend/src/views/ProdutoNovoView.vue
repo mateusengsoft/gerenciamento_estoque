@@ -3,10 +3,13 @@ import { defineComponent } from 'vue'
 import { mapStores } from 'pinia'
 import { useAuthStore } from '@/stores/auth'
 import { requisitar, ErroApi } from '@/services/api'
+import CampoMoeda from '@/components/CampoMoeda.vue'
 import type { Categoria, Local, Paginado, UnidadeMedida } from '@/types/api'
 
 export default defineComponent({
   name: 'ProdutoNovoView',
+
+  components: { CampoMoeda },
 
   data() {
     return {
@@ -148,7 +151,7 @@ export default defineComponent({
 
       <label>
         Preço de venda
-        <input v-model.number="formulario.precoVendaAtual" type="number" min="0" step="0.01" />
+        <CampoMoeda v-model="formulario.precoVendaAtual" />
       </label>
 
       <label>
