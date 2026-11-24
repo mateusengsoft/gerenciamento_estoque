@@ -28,6 +28,7 @@ export default defineComponent({
         email: '',
         cpf: '',
         contato: {
+          codigoPais: '55',
           ddd: '',
           numero: '',
         },
@@ -130,7 +131,7 @@ export default defineComponent({
       if (complemento) {
         endereco.complemento = complemento
       }
-      // O bairro vai de um jeito ou de outro, nunca dos dois.
+
       if (this.digitarBairro) {
         endereco.bairroNome = f.endereco.bairroNome.trim()
       } else {
@@ -144,6 +145,7 @@ export default defineComponent({
         email: f.email.trim(),
         cpf: apenasDigitos(f.cpf),
         contato: {
+          codigoPais: apenasDigitos(f.contato.codigoPais) || undefined,
           ddd: apenasDigitos(f.contato.ddd),
           numero: apenasDigitos(f.contato.numero),
         },
@@ -228,6 +230,10 @@ export default defineComponent({
 
       <fieldset>
         <legend>Contato</legend>
+        <label>
+          Código do país
+          <input v-model="formulario.contato.codigoPais" type="text" maxlength="3" />
+        </label>
         <label>
           DDD
           <input v-model="formulario.contato.ddd" type="text" maxlength="2" placeholder="11" />

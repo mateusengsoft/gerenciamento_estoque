@@ -190,6 +190,10 @@ export default defineComponent({
             {{ fornecedor.nome }}
           </option>
         </select>
+        <label>
+          Tipo de entrada
+          <input type="text" value="Compra" disabled />
+        </label>
       </label>
       <label>
         Local Destino
