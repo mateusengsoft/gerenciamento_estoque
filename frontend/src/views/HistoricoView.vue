@@ -242,7 +242,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <main>
+  <main class="pagina-historico">
     <h1>Histórico de movimentações</h1>
 
     <p v-if="erro" class="erro">{{ erro }}</p>
@@ -383,3 +383,38 @@ export default defineComponent({
     </section>
   </main>
 </template>
+
+<style scoped>
+.pagina-historico .filtros form {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  column-gap: 20px;
+}
+
+.pagina-historico .filtros form > div {
+  min-width: 0;
+}
+
+.pagina-historico .filtros select,
+.pagina-historico .filtros input {
+  width: 100%;
+  min-width: 0;
+}
+
+.pagina-historico .filtros .acoes-filtro {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 8px;
+}
+
+@media (max-width: 800px) {
+  .pagina-historico .filtros form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .pagina-historico .filtros form {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
