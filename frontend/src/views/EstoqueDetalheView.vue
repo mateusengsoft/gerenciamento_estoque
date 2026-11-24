@@ -117,14 +117,3 @@ export default defineComponent({
     </template>
   </main>
 </template>
-
-<style scoped>
-.etiqueta {
-  display: inline-block;
-  padding: 2px 8px;
-  margin-left: 4px;
-  border-radius: 12px;
-  font-size: 12px;
-  background: #fef3c7;
-}
-</style>

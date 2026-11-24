@@ -29,7 +29,7 @@ export default defineComponent({
     <RouterLink v-if="authStore.ehAdmin" to="/usuarios">Usuários</RouterLink>
 
     <span class="espaco"></span>
-    <span>{{ authStore.ehAdmin ? 'Administrador' : 'Operador' }}</span>
+    <span class="perfil">{{ authStore.ehAdmin ? 'Administrador' : 'Operador' }}</span>
     <button type="button" @click="sair">Sair</button>
   </nav>
 </template>
@@ -38,14 +38,35 @@ export default defineComponent({
 .barra {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 12px 24px;
-  border-bottom: 1px solid #ddd;
+  gap: 24px;
+  padding: 14px 32px;
+  background: #fff;
+  border-bottom: 1px solid #e5e7eb;
 }
+
+.barra a {
+  padding: 6px 0;
+  border-bottom: 2px solid transparent;
+  color: var(--cor-texto-suave);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.barra a:hover {
+  color: var(--cor-primaria);
+}
+
+.barra .router-link-active {
+  color: var(--cor-primaria);
+  border-bottom-color: var(--cor-primaria);
+}
+
 .espaco {
   flex: 1;
 }
-.router-link-active {
-  font-weight: bold;
+
+.perfil {
+  font-size: 14px;
+  color: var(--cor-texto-suave);
 }
 </style>

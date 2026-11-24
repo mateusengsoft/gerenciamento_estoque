@@ -383,4 +383,3 @@ export default defineComponent({
     </section>
   </main>
 </template>
-<style scoped></style>

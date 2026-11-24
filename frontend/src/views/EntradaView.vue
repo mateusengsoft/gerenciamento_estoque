@@ -190,10 +190,10 @@ export default defineComponent({
             {{ fornecedor.nome }}
           </option>
         </select>
-        <label>
-          Tipo de entrada
-          <input type="text" value="Compra" disabled />
-        </label>
+      </label>
+      <label>
+        Tipo de entrada
+        <input type="text" value="Compra" disabled />
       </label>
       <label>
         Local Destino
@@ -207,32 +207,36 @@ export default defineComponent({
       </label>
       <fieldset>
         <legend>Lote</legend>
-        <label><input v-model="modoLote" type="radio" value="existente" /> Lote existente</label>
-        <label><input v-model="modoLote" type="radio" value="novo" /> Lote novo</label>
-        <select v-if="modoLote === 'existente'" v-model="formulario.loteId">
-          <option :value="null" disabled>Escolha um lote</option>
-          <option v-for="lote in lotes" :key="lote.id" :value="lote.id">
-            {{ lote.codigoLote }} · {{ formatarData(lote.dataVencimento) }}
-          </option>
-        </select>
-        <section v-if="modoLote === 'novo'">
-          <label for="codigoLote"> Código Lote</label>
-          <input type="text" v-model="novoLote.codigoLote" id="codigoLote" />
-          <label for="dataFabricacao"> Data de Fabricação</label>
-          <input
-            type="date"
-            v-model="novoLote.dataFabricacao"
-            placeholder="Digite a data de  fabricação do lote"
-            id="dataFabricacao"
-          />
-          <label for="dataVencimento"> Data de Vencimento</label>
-          <input
-            type="date"
-            v-model="novoLote.dataVencimento"
-            placeholder="Digite a data de vencimento"
-            id="dataVencimento"
-          />
-        </section>
+
+        <div class="opcoes">
+          <label><input v-model="modoLote" type="radio" value="existente" /> Lote existente</label>
+          <label><input v-model="modoLote" type="radio" value="novo" /> Lote novo</label>
+        </div>
+
+        <label v-if="modoLote === 'existente'">
+          Lote
+          <select v-model="formulario.loteId">
+            <option :value="null" disabled>Escolha um lote</option>
+            <option v-for="lote in lotes" :key="lote.id" :value="lote.id">
+              {{ lote.codigoLote }} · {{ formatarData(lote.dataVencimento) }}
+            </option>
+          </select>
+        </label>
+
+        <template v-else>
+          <label>
+            Código do lote
+            <input v-model="novoLote.codigoLote" type="text" />
+          </label>
+          <label>
+            Data de fabricação
+            <input v-model="novoLote.dataFabricacao" type="date" />
+          </label>
+          <label>
+            Data de vencimento
+            <input v-model="novoLote.dataVencimento" type="date" />
+          </label>
+        </template>
       </fieldset>
       <label for="quantidade">
         Quantidade

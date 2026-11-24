@@ -48,55 +48,152 @@ export default defineComponent({
 
 <template>
   <main class="login">
-    <h1>Controle de Estoque</h1>
+    <section class="apresentacao">
+      <h1>Controle de Estoque</h1>
+      <p>Olá! Que bom ter você de volta.</p>
+      <p>Entre com o seu login para gerenciar os produtos, as entradas e as saídas do estoque.</p>
 
-    <form @submit.prevent="enviar">
-      <label>
-        Login
-        <input v-model="login" type="text" autocomplete="username" />
-      </label>
+      <!-- Ilustração simples: uma estante com caixas, desenhada com retângulos. -->
+      <svg class="ilustracao" viewBox="0 0 240 170" aria-hidden="true">
+        <rect x="20" y="10" width="6" height="150" fill="#ede9fe" />
+        <rect x="214" y="10" width="6" height="150" fill="#ede9fe" />
+        <rect x="20" y="58" width="200" height="5" fill="#ede9fe" />
+        <rect x="20" y="108" width="200" height="5" fill="#ede9fe" />
+        <rect x="20" y="155" width="200" height="5" fill="#ede9fe" />
 
-      <label>
-        Senha
-        <input
-          v-model="senha"
-          :type="mostrarSenha ? 'text' : 'password'"
-          autocomplete="current-password"
-        />
-        <label class="mostrar-senha">
-          <input v-model="mostrarSenha" type="checkbox" />
+        <rect x="36" y="22" width="40" height="36" rx="2" fill="#fbbf24" />
+        <rect x="80" y="32" width="30" height="26" rx="2" fill="#f59e0b" />
+        <rect x="150" y="26" width="44" height="32" rx="2" fill="#fbbf24" />
+        <rect x="44" y="80" width="34" height="28" rx="2" fill="#f59e0b" />
+        <rect x="120" y="72" width="44" height="36" rx="2" fill="#fbbf24" />
+        <rect x="168" y="84" width="28" height="24" rx="2" fill="#f59e0b" />
+        <rect x="60" y="124" width="46" height="31" rx="2" fill="#fbbf24" />
+        <rect x="140" y="130" width="34" height="25" rx="2" fill="#f59e0b" />
+
+        <rect x="54" y="22" width="4" height="36" fill="#d97706" />
+        <rect x="170" y="26" width="4" height="32" fill="#d97706" />
+        <rect x="140" y="72" width="4" height="36" fill="#d97706" />
+        <rect x="81" y="124" width="4" height="31" fill="#d97706" />
+      </svg>
+    </section>
+
+    <section class="acesso">
+      <h2>Acesso ao sistema</h2>
+
+      <form @submit.prevent="enviar">
+        <label>
+          Login
+          <input v-model="login" type="text" autocomplete="username" />
         </label>
-      </label>
 
-      <p v-if="erro" class="erro">{{ erro }}</p>
+        <label>
+          Senha
+          <input
+            v-model="senha"
+            :type="mostrarSenha ? 'text' : 'password'"
+            autocomplete="current-password"
+          />
+        </label>
 
-      <button type="submit" :disabled="!podeEnviar">
-        {{ carregando ? 'Entrando...' : 'Entrar' }}
-      </button>
-    </form>
-    <p>Ainda não tem acesso? <RouterLink to="/cadastro">Criar conta</RouterLink></p>
+        <label>
+          <input v-model="mostrarSenha" type="checkbox" />
+          Mostrar senha
+        </label>
+
+        <p v-if="erro" class="erro">{{ erro }}</p>
+
+        <button type="submit" :disabled="!podeEnviar">
+          {{ carregando ? 'Entrando...' : 'Acessar sistema' }}
+        </button>
+      </form>
+
+      <p class="convite">
+        Ainda não tem acesso? <RouterLink to="/cadastro">Criar conta</RouterLink>
+      </p>
+    </section>
   </main>
 </template>
 
 <style scoped>
 .login {
-  max-width: 320px;
-  margin: 80px auto;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  max-width: 880px;
+  margin: 64px auto;
+  padding: 0;
+  overflow: hidden;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
 }
-form {
+
+.apresentacao {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  padding: 40px;
+  background: var(--cor-primaria);
+  color: #fff;
 }
-label {
+
+.apresentacao h1 {
+  margin: 0 0 8px;
+  font-size: 30px;
+}
+
+.apresentacao p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.ilustracao {
+  width: 100%;
+  max-width: 300px;
+  margin-top: auto;
+  align-self: center;
+}
+
+.acesso {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  justify-content: center;
+  gap: 24px;
+  padding: 48px 40px;
 }
-.erro {
-  color: #b42318;
+
+.acesso h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 500;
+  color: var(--cor-texto-suave);
 }
+
+.acesso form {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 20px;
+  margin: 0;
+}
+
+.acesso input[type='text'],
+.acesso input[type='password'] {
+  width: 100%;
+  padding: 12px 4px;
+  font-size: 16px;
+  border: 0;
+  border-bottom: 2px solid var(--cor-primaria);
+  border-radius: 0;
+}
+
+.acesso button[type='submit'] {
+  padding: 12px;
+  margin-top: 8px;
+}
+
+.convite {
+  margin: 0;
+  font-size: 14px;
+}
+
+
 </style>
