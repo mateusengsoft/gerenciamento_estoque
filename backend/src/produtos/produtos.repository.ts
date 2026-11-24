@@ -32,6 +32,13 @@ const SQL_PROXIMO_DO_VENCIMENTO = `exists (
     and l2.data_vencimento <= current_date + 30
 )`;
 
+const SQL_DATA_PROXIMO_VENCIMENTO = `(
+  select to_char(min(l3.data_vencimento), 'YYYY-MM-DD')
+  from lotes l3
+  join estoques_atuais ea3 on ea3.lote_id = l3.id
+  where l3.produto_id = p.id
+    and ea3.quantidade > 0
+)`;
 const CAMPOS_PUBLICOS = {
   id: true,
   nome: true,
@@ -171,6 +178,7 @@ export class ProdutosRepository {
       .addSelect('p.estoqueMinimo', 'estoqueMinimo')
       .addSelect(SQL_ESTOQUE_BAIXO, 'estoqueBaixo')
       .addSelect(SQL_PROXIMO_DO_VENCIMENTO, 'proximoDoVencimento')
+      .addSelect(SQL_DATA_PROXIMO_VENCIMENTO, 'proximoVencimento')
       .orderBy('p.nome', 'ASC')
       .offset((pagina - 1) * limite)
       .limit(limite)

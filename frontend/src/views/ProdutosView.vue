@@ -4,7 +4,7 @@ import { mapStores } from 'pinia'
 import { useAuthStore } from '@/stores/auth'
 import { requisitar, ErroApi } from '@/services/api'
 import type { Paginado, ProdutoListagem } from '@/types/api'
-import { formatarPreco, formatarQuantidade } from '@/utils/formatar'
+import { formatarData, formatarPreco, formatarQuantidade } from '@/utils/formatar'
 
 export default defineComponent({
   name: 'ProdutosView',
@@ -86,6 +86,7 @@ export default defineComponent({
       this.filtros.precoMinimo = ''
       this.carregar()
     },
+    formatarData,
   },
 })
 </script>
@@ -140,8 +141,10 @@ export default defineComponent({
           <th>Nome</th>
           <th>Categoria</th>
           <th>Preço</th>
+          <th>Validade</th>
           <th>Estoque</th>
-          <th>Situação</th>
+          <th>Status</th>
+          <th>Alertas</th>
           <th></th>
         </tr>
       </thead>
@@ -149,40 +152,24 @@ export default defineComponent({
         <tr v-for="produto in produtos" :key="produto.id">
           <td>{{ produto.codigo }}</td>
           <td>{{ produto.nome }}</td>
-          <td>
-            {{ produto.categoriaNome }}
-          </td>
-          <td>
-            {{ formatarPreco(produto.precoVendaAtual) }}
-          </td>
-          <td>
-            {{ formatarQuantidade(produto.quantidadeTotal) }}
-          </td>
+          <td>{{ produto.categoriaNome }}</td>
+          <td>{{ formatarPreco(produto.precoVendaAtual) }}</td>
+          <td>{{ formatarData(produto.proximoVencimento) }}</td>
+          <td>{{ formatarQuantidade(produto.quantidadeTotal) }}</td>
+          <td>{{ produto.ativo ? 'Ativo' : 'Inativo' }}</td>
           <td>
             <span v-if="produto.estoqueBaixo" class="etiqueta">
-              Estoque abaixo de {{ formatarQuantidade(produto.estoqueMinimo) }}</span
-            >
-            <span v-if="!produto.ativo" class="etiqueta">Inativo </span>
-            <span v-if="produto.proximoDoVencimento" class="etiqueta">Vencendo </span>
+              Estoque abaixo de {{ formatarQuantidade(produto.estoqueMinimo) }}
+            </span>
+            <span v-if="produto.proximoDoVencimento" class="etiqueta">Vencendo</span>
           </td>
           <td>
-            <RouterLink v-if="authStore.ehAdmin" :to="`/produtos/${produto.id}/editar`"
-              >Editar</RouterLink
-            >
+            <RouterLink v-if="authStore.ehAdmin" :to="`/produtos/${produto.id}/editar`">
+              Editar
+            </RouterLink>
           </td>
         </tr>
       </tbody>
     </table>
   </main>
 </template>
-
-<style scoped>
-.etiqueta {
-  display: inline-block;
-  padding: 2px 8px;
-  margin-right: 4px;
-  border-radius: 12px;
-  font-size: 12px;
-  background: #fef3c7;
-}
-</style>

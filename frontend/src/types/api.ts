@@ -17,6 +17,7 @@ export interface ProdutoListagem {
   estoqueMinimo: string
   estoqueBaixo: boolean
   proximoDoVencimento: boolean
+  proximoVencimento: string | null
 }
 
 export interface FornecedorPublico {
